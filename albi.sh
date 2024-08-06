@@ -483,6 +483,7 @@ elif [[ "$vendor" == "AuthenticAMD" ]]; then
 fi
 
 ## Configure system locales, console keyboard layout, and hostname
+sed -i "/en_US.UTF-8 UTF-8/s/^#//" /etc/locale.gen
 sed -i "/$language/s/^#//" /etc/locale.gen
 echo "LANG=$language" > /etc/locale.conf
 echo "KEYMAP=$tty_keyboard_layout" > /etc/vconsole.conf
