@@ -483,7 +483,9 @@ elif [[ "$vendor" == "AuthenticAMD" ]]; then
 fi
 
 ## Configure system locales, console keyboard layout, and hostname
-sed -i "/en_US.UTF-8 UTF-8/s/^#//" /etc/locale.gen
+if [[ "$language" != "en_US.UTF-8 ]]; then
+    sed -i "/en_US.UTF-8 UTF-8/s/^#//" /etc/locale.gen
+fi
 sed -i "/$language/s/^#//" /etc/locale.gen
 echo "LANG=$language" > /etc/locale.conf
 echo "KEYMAP=$tty_keyboard_layout" > /etc/vconsole.conf
@@ -545,7 +547,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
-    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber pavucontrol --noconfirm
+    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
     systemctl enable --global pipewire pipewire-pulse
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio pavucontrol --noconfirm
