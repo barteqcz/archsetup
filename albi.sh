@@ -493,13 +493,13 @@ echo "$hostname" > /etc/hostname
 locale-gen
 
 ## Configure the /etc/hosts file for local hostname resolution
-echo "127.0.0.1       localhost" >> /etc/hosts
-echo "127.0.1.1       $hostname" >> /etc/hosts
-echo "" >> /etc/hosts
-echo "# The following lines are desirable for IPv6 capable hosts" >> /etc/hosts
-echo "::1             localhost ip6-localhost ip6-loopback" >> /etc/hosts
-echo "ff02::1         ip6-allnodes" >> /etc/hosts
-echo "ff02::2         ip6-allrouters" >> /etc/hosts
+echo "127.0.0.1       localhost
+127.0.1.1       $hostname
+
+# The following lines are desirable for IPv6 capable hosts
+::1             localhost ip6-localhost ip6-loopback
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters" > /etc/hosts
 
 ## Create an user
 useradd -m "$username"
@@ -568,7 +568,7 @@ elif [[ "$gpu" == "nvidia" ]]; then
     fi
     grub-mkconfig -o /boot/grub/grub.cfg
 elif [[ "$gpu" == "other" ]]; then
-    pacman -S mesa libva-mesa-driver --noconfirm
+    pacman -S mesa libva-mesa-driver mesa-vdpau --noconfirm
 fi
 
 ## Install the selected desktop environment along with related packages
@@ -601,11 +601,9 @@ fi
 ## If required, install CUPS and its related components
 if [[ "$install_cups" == yes ]]; then
     pacman -S cups cups-browsed cups-filters cups-pk-helper bluez-cups foomatic-db foomatic-db-engine foomatic-db-gutenprint-ppds foomatic-db-nonfree foomatic-db-nonfree-ppds foomatic-db-ppds ghostscript gutenprint hplip nss-mdns system-config-printer --noconfirm
-    systemctl enable cups.service
-    systemctl enable cups.socket
-    systemctl enable cups-browsed.service
-    systemctl enable avahi-daemon.service
-    systemctl enable avahi-daemon.socket
+    systemctl enable cups
+    systemctl enable cups-browsed
+    systemctl enable avahi-daemon
     sed -i "s/^hosts:.*/hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns/" /etc/nsswitch.conf
     rm -f /usr/share/applications/hplip.desktop /usr/share/applications/hplip.desktop.old
     rm -f /usr/share/applications/hp-uiscan.desktop /usr/share/applications/hp-uiscan.desktop.old
