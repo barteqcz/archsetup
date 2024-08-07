@@ -483,7 +483,7 @@ elif [[ "$vendor" == "AuthenticAMD" ]]; then
 fi
 
 ## Configure system locales, console keyboard layout, and hostname
-if [[ "$language" != "en_US.UTF-8 ]]; then
+if [[ "$language" != "en_US.UTF-8" ]]; then
     sed -i "/en_US.UTF-8 UTF-8/s/^#//" /etc/locale.gen
 fi
 sed -i "/$language/s/^#//" /etc/locale.gen
@@ -493,13 +493,13 @@ echo "$hostname" > /etc/hostname
 locale-gen
 
 ## Configure the /etc/hosts file for local hostname resolution
-echo "127.0.0.1       localhost
-127.0.1.1       $hostname
-
-# The following lines are desirable for IPv6 capable hosts
-::1             localhost ip6-localhost ip6-loopback
-ff02::1         ip6-allnodes
-ff02::2         ip6-allrouters" > /etc/hosts
+echo "127.0.0.1       localhost" >> /etc/hosts
+echo "127.0.1.1       $hostname" >> /etc/hosts
+echo "" >> /etc/hosts
+echo "# The following lines are desirable for IPv6 capable hosts" >> /etc/hosts
+echo "::1             localhost ip6-localhost ip6-loopback" >> /etc/hosts
+echo "ff02::1         ip6-allnodes" >> /etc/hosts
+echo "ff02::2         ip6-allrouters" >> /etc/hosts
 
 ## Create an user
 useradd -m "$username"
@@ -547,7 +547,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
-    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
+    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber pavucontrol --noconfirm
     systemctl enable --global pipewire pipewire-pulse
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio pavucontrol --noconfirm
@@ -568,7 +568,7 @@ elif [[ "$gpu" == "nvidia" ]]; then
     fi
     grub-mkconfig -o /boot/grub/grub.cfg
 elif [[ "$gpu" == "other" ]]; then
-    pacman -S mesa libva-mesa-driver mesa-vdpau --noconfirm
+    pacman -S mesa libva-mesa-driver --noconfirm
 fi
 
 ## Install the selected desktop environment along with related packages
