@@ -556,7 +556,7 @@ fi
 
 ## Install the selected graphics driver (proceed with any additional configuration if needed)
 if [[ "$gpu" == "amd" ]]; then
-    pacman -S mesa vulkan-radeon libva-mesa-driver mesa-vdpau xf86-video-amdgpu --noconfirm
+    pacman -S mesa vulkan-radeon libva-mesa-driver mesa-vdpau --noconfirm
 elif [[ "$gpu" == "intel" ]]; then
     pacman -S mesa vulkan-intel intel-media-driver --noconfirm
 elif [[ "$gpu" == "nvidia" ]]; then
