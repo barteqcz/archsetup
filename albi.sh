@@ -89,7 +89,7 @@ audio_server="pipewire"  #### Audio server (pulseaudio/pipewire/none)
 gpu="amd"  #### GPU driver (amd/intel/nvidia/other)
 de="gnome"  #### Desktop environment (gnome/plasma/xfce/mate/cinnamon/none)
 install_cups="yes"  #### Install CUPS (yes/no)
-custom_packages="firefox htop papirus-icon-theme"  #### Custom packages (space-separated list or empty)
+custom_packages="htop"  #### Custom packages (space-separated list or empty)
 
 ### Swapfile
 create_swapfile="yes"  #### Create swapfile (yes/no)
