@@ -547,11 +547,12 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
-    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber pavucontrol --noconfirm
-    systemctl enable --global pipewire pipewire-pulse
+    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
+    systemctl --global enable pipewire
+    systemctl --global enable wireplumber
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio pavucontrol --noconfirm
-    systemctl enable --global pulseaudio
+    systemctl --global enable pulseaudio
 fi
 
 ## Install the selected graphics driver (proceed with any additional configuration if needed)
