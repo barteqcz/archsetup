@@ -509,11 +509,6 @@ if [[ "$full_username" != "" ]]; then
 fi
 usermod -aG wheel "$username"
 
-## Remove the password from the configuration file if it's going to be kept
-if [[ "$keep_config" == "yes" ]]; then
-    sed -i "s/^password=.*/password=\"\"/" config.conf
-fi
-
 ## Apply system tweaks for enhanced usability
 cln=$(grep -n "Color" /etc/pacman.conf | cut -d ':' -f1)
 dln=$(grep -n "## Defaults specification" /etc/sudoers | cut -d ':' -f1)
