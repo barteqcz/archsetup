@@ -613,7 +613,7 @@ cd
 git clone https://aur.archlinux.org/yay
 cd yay
 makepkg -si --noconfirm
-cd /home/$username
+cd
 rm -rf yay
 yay -Sy --noconfirm
 if [[ "$install_cups" == "yes" ]]; then
