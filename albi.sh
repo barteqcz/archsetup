@@ -614,7 +614,6 @@ git clone https://aur.archlinux.org/yay
 cd yay
 makepkg -si --noconfirm
 cd
-rm -rf yay
 yay -Sy --noconfirm
 if [[ "$install_cups" == "yes" ]]; then
     yay -S hplip-plugin --noconfirm
@@ -627,6 +626,7 @@ if [[ "$de" == "cinnamon" ]]; then
 fi
 
 ### Clean up yay cache and remove unnecessary files after installation
+rm -rf /home/$username/yay
 yes | yay -Sc
 yes | yay -Scc
 EOY
