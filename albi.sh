@@ -626,6 +626,8 @@ if [[ "$de" == "cinnamon" ]]; then
 fi
 
 ### Clean up yay cache and remove unnecessary files after installation
+chown -R root:root /home/"$username"/yay
+rm -rf /home/"$username"/yay
 yes | yay -Sc
 yes | yay -Scc
 EOY
