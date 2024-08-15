@@ -614,7 +614,6 @@ git clone https://aur.archlinux.org/yay
 cd yay
 makepkg -si --noconfirm
 cd
-sudo rm -rf yay
 yay -Sy --noconfirm
 if [[ "$install_cups" == "yes" ]]; then
     yay -S hplip-plugin --noconfirm
