@@ -542,12 +542,9 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
-    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
-    systemctl --global enable pipewire
-    systemctl --global enable wireplumber
+    pacman -S pipewire pipewire-pulse pipewire-alsa wireplumber --noconfirm
 elif [[ "$audio_server" == "pulseaudio" ]]; then
-    pacman -S pulseaudio pavucontrol --noconfirm
-    systemctl --global enable pulseaudio
+    pacman -S pulseaudio --noconfirm
 fi
 
 ## Install the selected graphics driver (proceed with any additional configuration if needed)
@@ -605,7 +602,7 @@ if [[ "$install_cups" == yes ]]; then
     rm -f /usr/share/applications/hp-uiscan.desktop /usr/share/applications/hp-uiscan.desktop.old
 fi
 
-## Install the AUR helper and additional packages
+## Install the AUR helper and additional packages and run user-specific actions
 touch tmpscript.sh
 cat <<'EOY' > tmpscript.sh
 source /config.conf
@@ -624,7 +621,11 @@ fi
 if [[ "$de" == "cinnamon" ]]; then
     yay -S lightdm-settings --noconfirm
 fi
-
+if [[ "$audio_server" == "pipewire" ]]; then
+    systemctl --user enable pipewire pipewire-pulse wireplumber
+elif [[ "$audio_server" == "pulseaudio" ]]; then
+    systemctl --user enable pulseaudio
+fi
 ### Clean up yay cache and remove unnecessary files after installation
 yes | yay -Sc
 yes | yay -Scc
