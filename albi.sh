@@ -542,7 +542,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
-    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
+    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack pipewire-audio wireplumber --noconfirm
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio --noconfirm
 fi
@@ -622,7 +622,7 @@ if [[ "$de" == "cinnamon" ]]; then
     yay -S lightdm-settings --noconfirm
 fi
 if [[ "$audio_server" == "pipewire" ]]; then
-    systemctl --user enable pipewire pipewire-pulse wireplumber
+    systemctl --user enable pipewire-pulse.service
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     systemctl --user enable pulseaudio
 fi
