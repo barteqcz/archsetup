@@ -542,7 +542,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
-    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack pipewire-audio wireplumber --noconfirm
+    pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber gst-plugin-pipewire libpulse --noconfirm
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio --noconfirm
 fi
