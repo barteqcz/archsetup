@@ -622,7 +622,7 @@ if [[ "$de" == "cinnamon" ]]; then
     yay -S lightdm-settings --noconfirm
 fi
 if [[ "$audio_server" == "pipewire" ]]; then
-    systemctl --user enable pipewire pipewire-pulse pipewire-session-manager wireplumber
+    systemctl --user enable pipewire-session-manager wireplumber
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     systemctl --user enable pulseaudio
 fi
