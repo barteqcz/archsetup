@@ -574,7 +574,7 @@ if [[ "$de" == "gnome" ]]; then
     fi
 elif [[ "$de" == "plasma" ]]; then
     pacman -S xorg wayland --noconfirm
-    pacman -S sddm plasma kwalletmanager kate konsole dolphin spectacle ark noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra gvfs power-profiles-daemon --noconfirm
+    pacman -S sddm plasma kwalletmanager kate konsole dolphin spectacle ark noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra gvfs power-profiles-daemon maliit-keyboard --noconfirm
     systemctl enable sddm
 elif [[ "$de" == "xfce" ]]; then
     pacman -S xorg wayland --noconfirm
@@ -598,8 +598,8 @@ if [[ "$install_cups" == yes ]]; then
     systemctl enable cups-browsed
     systemctl enable avahi-daemon
     sed -i "s/^hosts:.*/hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns/" /etc/nsswitch.conf
-    rm -f /usr/share/applications/hplip.desktop /usr/share/applications/hplip.desktop.old
-    rm -f /usr/share/applications/hp-uiscan.desktop /usr/share/applications/hp-uiscan.desktop.old
+    rm -f /usr/share/applications/hplip.desktop
+    rm -f /usr/share/applications/hp-uiscan.desktop
 fi
 
 ## Install the AUR helper and additional packages and run user-specific actions
