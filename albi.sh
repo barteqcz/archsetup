@@ -602,38 +602,41 @@ if [[ "$install_cups" == yes ]]; then
     rm -f /usr/share/applications/hp-uiscan.desktop
 fi
 
-## Install the AUR helper and additional packages and run user-specific actions
+## Install additional AUR packages and run user-specific actions
 touch tmpscript.sh
 cat <<'EOY' > tmpscript.sh
 source /config.conf
 cd
-git clone https://aur.archlinux.org/yay
-cd yay
-makepkg -si --noconfirm
-cd
-yay -Sy --noconfirm
-if [[ "$install_cups" == "yes" ]]; then
-    yay -S hplip-plugin --noconfirm
-fi
 if [[ "$de" == "xfce" ]]; then
-    yay -S mugshot --noconfirm
+    git clone https://aur.archlinux.org/mugshot.git
+    cd mugshot/
+    makepkg -si --noconfirm
+    cd
 fi
 if [[ "$de" == "cinnamon" ]]; then
-    yay -S lightdm-settings --noconfirm
+    git clone https://aur.archlinux.org/lightdm-settings.git
+    cd lightdm-settings/
+    makepkg -si --noconfirm
+    cd
 fi
 if [[ "$audio_server" == "pipewire" ]]; then
     systemctl --user enable pipewire pipewire-pulse wireplumber
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     systemctl --user enable pulseaudio
 fi
-### Clean up yay cache and remove unnecessary files after installation
-yes | yay -Sc
-yes | yay -Scc
 EOY
 chown "$username":"$username" tmpscript.sh
 echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/tmp
 sudo -u "$username" bash tmpscript.sh
 rm -f /etc/sudoers.d/tmp
+
+## Remove PKGBUILDs from AUR
+if [[ "$de" == "xfce" ]]; then
+    rm -rf /home/$username/mugshot
+fi
+if [[ "$de" == "cinnamon" ]]; then
+    rm -rf /home/$username/lightdm-settings
+fi
 
 ## Add sudo privileges for the user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
