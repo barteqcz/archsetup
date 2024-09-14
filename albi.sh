@@ -512,7 +512,7 @@ usermod -aG wheel "$username"
 ## Apply system tweaks for enhanced usability
 cln=$(grep -n "Color" /etc/pacman.conf | cut -d ':' -f1)
 dln=$(grep -n "## Defaults specification" /etc/sudoers | cut -d ':' -f1)
-sed -i 's/^#include \/usr\/share\/nano\/\*\.nanorc/include \/usr\/share\/nano\/\*\.nanorc/' /etc/nanorc
+sed -i '/^#include \/usr\/share\/nano\/\*.nanorc/s/^#//' /etc/nanorc
 sed -i '/Color/s/^#//g' /etc/pacman.conf
 sed -i "${cln}s/$/\nILoveCandy/" /etc/pacman.conf
 sed -i "${dln}s/$/\nDefaults    pwfeedback/" /etc/sudoers
