@@ -25,6 +25,109 @@ if [[ -e "config.conf" ]]; then
         echo "Syntax errors found in the configuration file."
         exit
     else
+        echo "Are these information correct?"
+        echo ""
+        echo ""
+
+        echo "/ partition filesystem: $root_part_filesystem"
+        if [[ "$separate_home_part_filesystem" != "none" ]]; then
+            echo "/home partition filesystem: $separate_home_part_filesystem"
+        fi
+        if [[ "$separate_boot_part_filesystem" != "none" ]]; then
+            echo "/boot partition filesystem: $separate_boot_part_filesystem"
+        fi
+        if [[ "$separate_var_part_filesystem" != "none" ]]; then
+            echo "/var partition filesystem: $separate_var_part_filesystem"
+        fi
+        if [[ "$separate_usr_part_filesystem" != "none" ]]; then
+            echo "/usr partition filesystem: $separate_usr_part_filesystem"
+        fi
+        if [[ "$separate_tmp_part_filesystem" != "none" ]]; then
+            echo "/tmp partition filesystem: $separate_tmp_part_filesystem"
+        fi
+
+        echo "/ partition mountpoint: $root_part"
+        if [[ "$separate_home_part" != "none" ]]; then
+            echo "/home partition mountpoint: $separate_home_part"
+        fi
+        if [[ "$separate_boot_part" != "none" ]]; then
+            echo "/boot partition mountpoint: $separate_boot_part"
+        fi
+        if [[ "$separate_var_part" != "none" ]]; then
+            echo "/var partition mountpoint: $separate_var_part"
+        fi
+        if [[ "$separate_usr_part" != "none" ]]; then
+            echo "/usr partition mountpoint: $separate_usr_part"
+        fi
+        if [[ "$separate_tmp_part" != "none" ]]; then
+            echo "/tmp partition mountpoint: $separate_tmp_part"
+        fi
+
+        if [[ "$luks_encryption" == "yes" ]]; then
+            echo "Disk encryption enabled"
+            echo "Disk encryption passphrase: $luks_passphrase"
+        else
+            echo "Disk encryption disabled"
+        fi
+
+        if [[ "$boot_mode" == "UEFI" ]]; then
+            echo "EFI partition: $efi_part"
+            echo "EFI partition mountpoint: $efi_part_mountpoint"
+        else
+            echo "GRUB disk: $grub_disk"
+        fi
+
+        echo "Kernel variant: $kernel_variant"
+        echo "Mirror country: $mirror_location"
+        echo "Time zone: $timezone"
+        echo "Hostname: $hostname"
+        echo "Username: $username"
+        echo "Full username: $full_username"
+        echo "User password: $password"
+        echo "Language: $language"
+        echo "TTY keyboard layout: $tty_keyboard_layout"
+        echo "Audio server: $audio_server"
+        echo "GPU driver: $gpu"
+        echo "Desktop environment: $de"
+        
+        if [[ "$install_cups" == "yes" ]]; then
+            echo "CUPS installation enabled"
+        else
+            echo "CUPS installation disabled"
+        fi
+        
+        if [[ "$custom_packages" != "" ]]; then
+            echo "Custom packages: $custom_packages"
+        else
+            echo "No custom packages defined"
+        fi
+
+        if [[ "$create_swapfile" == "yes" ]]; then
+            echo "Swapfile creation enabled"
+            echo "Swapfile size (GB): $swapfile_size_gb"
+        else
+            echo "Swapfile creation disabled"
+        fi
+
+        if [[ "$keep_config" == "yes" ]]; then
+            echo "Config file will be kept in the user directory"
+        else
+            echo "Config file won't  be kept in the user directory"
+        fi
+
+        while true; do
+            read -rp "Do you want to start the installation? [Y/n] " response
+
+            if [[ "$response" == "Y" || "$response" == "y" || "$response" == "" ]]; then
+                break
+            elif [[ "$response" == "N" || "$response" == "n" ]]; then
+                echo "Aborting..."
+                exit
+            else
+                echo "Incorrect option. Please try again"
+            fi
+        done
+
         source "$cwd"/config.conf
     fi
 else
@@ -57,7 +160,7 @@ EOF
 if [[ "$boot_mode" == "UEFI" ]]; then
     echo "### EFI partition settings" >> config.conf
     echo "efi_part=\"/dev/sdX#\"  #### EFI partition path" >> config.conf
-    echo "efi_part_mountpoint=\"/boot/efi\"  #### EFI partition mount point" >> config.conf
+    echo "efi_part_mountpoint=\"/boot/efi\"  #### EFI partition mountpoint" >> config.conf
 else
     echo "### GRUB installation disk settings" >> config.conf
     echo "grub_disk=\"/dev/sdX\"  #### Disk for GRUB installation" >> config.conf
@@ -503,7 +606,24 @@ cat <<'EOFile' > main.sh
 
 ## Define a signal handler for interruption signals
 interrupt_handler() {
-    echo "Interruption signal received. Aborting... "
+    echo "Interruption signal received. Aborting..."
+    echo "Unmounting partitions..."
+    if [[ "$home_part_exists" == "true" ]]; then
+        umount /mnt/home
+    fi
+    if [[ "$var_part_exists" == "true" ]]; then
+        umount /mnt/var
+    fi
+    if [[ "$usr_part_exists" == "true" ]]; then
+        umount /mnt/usr
+    fi
+    if [[ "$tmp_part_exists" == "true" ]]; then
+        umount /mnt/tmp
+    fi
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        umount /mnt"$efi_part_mountpoint"
+    fi
+    umount /mnt
     exit
 }
 
