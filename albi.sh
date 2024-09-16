@@ -441,6 +441,7 @@ elif [[ "$boot_mode" == "BIOS" ]]; then
 fi
 
 ## Verify if the system is connected to the Internet
+echo "Checking the Internet connection..."
 ping -c 4 8.8.8.8 > /dev/null 2>&1
 if ! [[ $? -eq 0 ]]; then
     ping -c 4 1.1.1.1 > /dev/null 2>&1
