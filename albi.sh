@@ -116,6 +116,8 @@ if [[ -e "config.conf" ]]; then
             echo "Config file won't  be kept in the user directory"
         fi
 
+        echo ""
+
         while true; do
             read -rp "Do you want to start the installation? [Y/n] " response
 
