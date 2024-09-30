@@ -31,36 +31,36 @@ if [[ -e "config.conf" ]]; then
         echo ""
 
         echo "/ partition filesystem: $root_part_filesystem"
-        if [[ "$separate_home_part_filesystem" != "none" ]]; then
-            echo "/home partition filesystem: $separate_home_part_filesystem"
-        fi
-        if [[ "$separate_boot_part_filesystem" != "none" ]]; then
-            echo "/boot partition filesystem: $separate_boot_part_filesystem"
-        fi
-        if [[ "$separate_var_part_filesystem" != "none" ]]; then
-            echo "/var partition filesystem: $separate_var_part_filesystem"
-        fi
-        if [[ "$separate_usr_part_filesystem" != "none" ]]; then
-            echo "/usr partition filesystem: $separate_usr_part_filesystem"
-        fi
-        if [[ "$separate_tmp_part_filesystem" != "none" ]]; then
-            echo "/tmp partition filesystem: $separate_tmp_part_filesystem"
-        fi
-
         echo "/ partition mountpoint: $root_part"
+
         if [[ "$separate_home_part" != "none" ]]; then
+            if [[ "$separate_home_part_filesystem" != "none" ]]; then
+                echo "/home partition filesystem: $separate_home_part_filesystem"
+            fi
             echo "/home partition mountpoint: $separate_home_part"
         fi
         if [[ "$separate_boot_part" != "none" ]]; then
+            if [[ "$separate_boot_part_filesystem" != "none" ]]; then
+                echo "/boot partition filesystem: $separate_boot_part_filesystem"
+            fi
             echo "/boot partition mountpoint: $separate_boot_part"
         fi
         if [[ "$separate_var_part" != "none" ]]; then
+            if [[ "$separate_var_part_filesystem" != "none" ]]; then
+                echo "/var partition filesystem: $separate_var_part_filesystem"
+            fi
             echo "/var partition mountpoint: $separate_var_part"
         fi
         if [[ "$separate_usr_part" != "none" ]]; then
+            if [[ "$separate_usr_part_filesystem" != "none" ]]; then
+                echo "/usr partition filesystem: $separate_usr_part_filesystem"
+            fi
             echo "/usr partition mountpoint: $separate_usr_part"
         fi
         if [[ "$separate_tmp_part" != "none" ]]; then
+            if [[ "$separate_tmp_part_filesystem" != "none" ]]; then
+                echo "/tmp partition filesystem: $separate_tmp_part_filesystem"
+            fi
             echo "/tmp partition mountpoint: $separate_tmp_part"
         fi
 
