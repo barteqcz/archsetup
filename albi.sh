@@ -113,7 +113,7 @@ if [[ -e "config.conf" ]]; then
         if [[ "$keep_config" == "yes" ]]; then
             echo "Config file will be kept in the user directory"
         else
-            echo "Config file won't  be kept in the user directory"
+            echo "Config file won't be kept in the user directory"
         fi
 
         echo ""
