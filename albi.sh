@@ -25,6 +25,7 @@ if [[ -e "config.conf" ]]; then
         echo "Syntax errors found in the configuration file."
         exit
     else
+        source "$cwd"/config.conf
         echo "Are these information correct?"
         echo ""
         echo ""
