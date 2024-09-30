@@ -26,6 +26,112 @@ if [[ -e "config.conf" ]]; then
         exit
     else
         source "$cwd"/config.conf
+        echo "Are these information correct?"
+        echo ""
+        echo ""
+
+        echo "/ partition filesystem: $root_part_filesystem"
+        echo "/ partition mountpoint: $root_part"
+
+        if [[ "$separate_home_part" != "none" ]]; then
+            if [[ "$separate_home_part_filesystem" != "none" ]]; then
+                echo "/home partition filesystem: $separate_home_part_filesystem"
+            fi
+            echo "/home partition mountpoint: $separate_home_part"
+        fi
+        if [[ "$separate_boot_part" != "none" ]]; then
+            if [[ "$separate_boot_part_filesystem" != "none" ]]; then
+                echo "/boot partition filesystem: $separate_boot_part_filesystem"
+            fi
+            echo "/boot partition mountpoint: $separate_boot_part"
+        fi
+        if [[ "$separate_var_part" != "none" ]]; then
+            if [[ "$separate_var_part_filesystem" != "none" ]]; then
+                echo "/var partition filesystem: $separate_var_part_filesystem"
+            fi
+            echo "/var partition mountpoint: $separate_var_part"
+        fi
+        if [[ "$separate_usr_part" != "none" ]]; then
+            if [[ "$separate_usr_part_filesystem" != "none" ]]; then
+                echo "/usr partition filesystem: $separate_usr_part_filesystem"
+            fi
+            echo "/usr partition mountpoint: $separate_usr_part"
+        fi
+        if [[ "$separate_tmp_part" != "none" ]]; then
+            if [[ "$separate_tmp_part_filesystem" != "none" ]]; then
+                echo "/tmp partition filesystem: $separate_tmp_part_filesystem"
+            fi
+            echo "/tmp partition mountpoint: $separate_tmp_part"
+        fi
+
+        if [[ "$luks_encryption" == "yes" ]]; then
+            echo "Disk encryption enabled"
+            echo "Disk encryption passphrase: $luks_passphrase"
+        else
+            echo "Disk encryption disabled"
+        fi
+
+        if [[ "$boot_mode" == "UEFI" ]]; then
+            echo "EFI partition: $efi_part"
+            echo "EFI partition mountpoint: $efi_part_mountpoint"
+        else
+            echo "GRUB disk: $grub_disk"
+        fi
+
+        echo "Kernel variant: $kernel_variant"
+        echo "Mirror country: $mirror_location"
+        echo "Time zone: $timezone"
+        echo "Hostname: $hostname"
+        echo "Username: $username"
+        echo "Full username: $full_username"
+        echo "User password: $password"
+        echo "Language: $language"
+        echo "TTY keyboard layout: $tty_keyboard_layout"
+        echo "Audio server: $audio_server"
+        echo "GPU driver: $gpu"
+        echo "Desktop environment: $de"
+        
+        if [[ "$install_cups" == "yes" ]]; then
+            echo "CUPS installation enabled"
+        else
+            echo "CUPS installation disabled"
+        fi
+        
+        if [[ "$custom_packages" != "" ]]; then
+            echo "Custom packages: $custom_packages"
+        else
+            echo "No custom packages defined"
+        fi
+
+        if [[ "$create_swapfile" == "yes" ]]; then
+            echo "Swapfile creation enabled"
+            echo "Swapfile size (GB): $swapfile_size_gb"
+        else
+            echo "Swapfile creation disabled"
+        fi
+
+        if [[ "$keep_config" == "yes" ]]; then
+            echo "Config file will be kept in the user directory"
+        else
+            echo "Config file won't be kept in the user directory"
+        fi
+
+        echo ""
+
+        while true; do
+            read -rp "Do you want to start the installation? [Y/n] " response
+
+            if [[ "$response" == "Y" || "$response" == "y" || "$response" == "" ]]; then
+                break
+            elif [[ "$response" == "N" || "$response" == "n" ]]; then
+                echo "Aborting..."
+                exit
+            else
+                echo "Incorrect option. Please try again"
+            fi
+        done
+
+        source "$cwd"/config.conf
     fi
 else
     touch config.conf
@@ -57,7 +163,7 @@ EOF
 if [[ "$boot_mode" == "UEFI" ]]; then
     echo "### EFI partition settings" >> config.conf
     echo "efi_part=\"/dev/sdX#\"  #### EFI partition path" >> config.conf
-    echo "efi_part_mountpoint=\"/boot/efi\"  #### EFI partition mount point" >> config.conf
+    echo "efi_part_mountpoint=\"/boot/efi\"  #### EFI partition mountpoint" >> config.conf
 else
     echo "### GRUB installation disk settings" >> config.conf
     echo "grub_disk=\"/dev/sdX\"  #### Disk for GRUB installation" >> config.conf
@@ -87,7 +193,7 @@ tty_keyboard_layout="us"  #### TTY keyboard layout
 ### Software Selection
 audio_server="pipewire"  #### Audio server (pulseaudio/pipewire/none)
 gpu="amd"  #### GPU driver (amd/intel/nvidia/other)
-de="gnome"  #### Desktop environment (gnome/plasma/xfce/mate/cinnamon/none)
+de="plasma"  #### Desktop environment (gnome/plasma/xfce/mate/cinnamon/none)
 install_cups="yes"  #### Install CUPS (yes/no)
 custom_packages="htop"  #### Custom packages (space-separated list or empty)
 
@@ -209,19 +315,26 @@ if [[ "$root_part" != "none" ]]; then
 
             if [[ "$root_part_filesystem" == "ext4" ]]; then
                 yes | mkfs.ext4 "$root_part"
+                mount "$root_part" /mnt
             elif [[ "$root_part_filesystem" == "ext3" ]]; then
                 yes | mkfs.ext3 "$root_part"
+                mount "$root_part" /mnt
             elif [[ "$root_part_filesystem" == "ext2" ]]; then
                 yes | mkfs.ext2 "$root_part"
+                mount "$root_part" /mnt
             elif [[ "$root_part_filesystem" == "btrfs" ]]; then
                 yes | mkfs.btrfs "$root_part"
+                mount "$root_part" /mnt
+                btrfs subvolume create /mnt/@
+                umount /mnt
+                mount -o compress=zstd,subvol=@ "$root_part" /mnt
             elif [[ "$root_part_filesystem" == "xfs" ]]; then
                 yes | mkfs.xfs "$root_part"
+                mount "$root_part" /mnt
             else
                 echo "Error: wrong filesystem for the / partition."
                 exit
             fi
-            mount "$root_part" /mnt
         else
             echo "Error: partition $root_part isn't a valid path - it doesn't exist or isn't accessible."
             exit
@@ -273,91 +386,141 @@ fi
 if [[ "$home_part_exists" == "true" ]]; then
     if [[ "$separate_home_part_filesystem" == "ext4" ]]; then
         yes | mkfs.ext4 "$separate_home_part"
+        mkdir -p /mnt/home
+        mount "$separate_home_part" /mnt/home
     elif [[ "$separate_home_part_filesystem" == "ext3" ]]; then
         yes | mkfs.ext3 "$separate_home_part"
+        mkdir -p /mnt/home
+        mount "$separate_home_part" /mnt/home
     elif [[ "$separate_home_part_filesystem" == "ext2" ]]; then
         yes | mkfs.ext2 "$separate_home_part"
+        mkdir -p /mnt/home
+        mount "$separate_home_part" /mnt/home
     elif [[ "$separate_home_part_filesystem" == "btrfs" ]]; then
         yes | mkfs.btrfs "$separate_home_part"
+        mkdir -p /mnt/home
+        btrfs subvolume create /mnt/@home
+        umount /mnt/home
+        mount -o compress=zstd,subvol=@home "$separate_home_part" /mnt/home
     elif [[ "$separate_home_part_filesystem" == "xfs" ]]; then
         yes | mkfs.xfs "$separate_home_part"
+        mkdir -p /mnt/home
+        mount "$separate_home_part" /mnt/home
     else
         echo "Error: wrong filesystem for the /home partition."
     fi
-    mkdir -p /mnt/home
-    mount "$separate_home_part" /mnt/home
 fi
 
 if [[ "$boot_part_exists" == "true" ]]; then
     if [[ "$separate_boot_part_filesystem" == "ext4" ]]; then
         yes | mkfs.ext4 "$separate_boot_part"
+        mkdir -p /mnt/boot
+        mount "$separate_boot_part" /mnt/boot
     elif [[ "$separate_boot_part_filesystem" == "ext3" ]]; then
         yes | mkfs.ext3 "$separate_boot_part"
+        mkdir -p /mnt/boot
+        mount "$separate_boot_part" /mnt/boot
     elif [[ "$separate_boot_part_filesystem" == "ext2" ]]; then
         yes | mkfs.ext2 "$separate_boot_part"
+        mkdir -p /mnt/boot
+        mount "$separate_boot_part" /mnt/boot
     elif [[ "$separate_boot_part_filesystem" == "btrfs" ]]; then
         yes | mkfs.btrfs "$separate_boot_part"
+        mkdir -p /mnt/boot
+        btrfs subvolume create /mnt/@boot
+        umount /mnt/boot
+        mount -o compress=zstd,subvol=@boot "$separate_boot_part" /mnt/boot
     elif [[ "$separate_boot_part_filesystem" == "xfs" ]]; then
         yes | mkfs.xfs "$separate_boot_part"
+        mkdir -p /mnt/boot
+        mount "$separate_boot_part" /mnt/boot
     else
         echo "Error: wrong filesystem for the /boot partition."
     fi
-    mkdir -p /mnt/boot
-    mount "$separate_boot_part" /mnt/boot
 fi
 
 if [[ "$var_part_exists" == "true" ]]; then
     if [[ "$separate_var_part_filesystem" == "ext4" ]]; then
         yes | mkfs.ext4 "$separate_var_part"
+        mkdir -p /mnt/var
+        mount "$separate_var_part" /mnt/var
     elif [[ "$separate_var_part_filesystem" == "ext3" ]]; then
         yes | mkfs.ext3 "$separate_var_part"
+        mkdir -p /mnt/var
+        mount "$separate_var_part" /mnt/var
     elif [[ "$separate_var_part_filesystem" == "ext2" ]]; then
         yes | mkfs.ext2 "$separate_var_part"
+        mkdir -p /mnt/var
+        mount "$separate_var_part" /mnt/var
     elif [[ "$separate_var_part_filesystem" == "btrfs" ]]; then
         yes | mkfs.btrfs "$separate_var_part"
+        mkdir -p /mnt/var
+        btrfs subvolume create /mnt/@var
+        umount /mnt/var
+        mount -o compress=zstd,subvol=@var "$separate_var_part" /mnt/var
     elif [[ "$separate_var_part_filesystem" == "xfs" ]]; then
         yes | mkfs.xfs "$separate_var_part"
+        mkdir -p /mnt/var
+        mount "$separate_var_part" /mnt/var
     else
         echo "Error: wrong filesystem for the /var partition."
     fi
-    mkdir -p /mnt/var
-    mount "$separate_var_part" /mnt/var
 fi
 
-if [[ "$separate_usr_part_exists" == "true" ]]; then
+if [[ "$usr_part_exists" == "true" ]]; then
     if [[ "$separate_usr_part_filesystem" == "ext4" ]]; then
         yes | mkfs.ext4 "$separate_usr_part"
+        mkdir -p /mnt/usr
+        mount "$separate_usr_part" /mnt/usr
     elif [[ "$separate_usr_part_filesystem" == "ext3" ]]; then
         yes | mkfs.ext3 "$separate_usr_part"
+        mkdir -p /mnt/usr
+        mount "$separate_usr_part" /mnt/usr
     elif [[ "$separate_usr_part_filesystem" == "ext2" ]]; then
         yes | mkfs.ext2 "$separate_usr_part"
+        mkdir -p /mnt/usr
+        mount "$separate_usr_part" /mnt/usr
     elif [[ "$separate_usr_part_filesystem" == "btrfs" ]]; then
         yes | mkfs.btrfs "$separate_usr_part"
+        mkdir -p /mnt/usr
+        btrfs subvolume create /mnt/@usr
+        umount /mnt/usr
+        mount -o compress=zstd,subvol=@usr "$separate_usr_part" /mnt/usr
     elif [[ "$separate_usr_part_filesystem" == "xfs" ]]; then
         yes | mkfs.xfs "$separate_usr_part"
+        mkdir -p /mnt/usr
+        mount "$separate_usr_part" /mnt/usr
     else
         echo "Error: wrong filesystem for the /usr partition."
     fi
-    mkdir -p /mnt/usr
-    mount "$separate_usr_part" /mnt/usr
 fi
 
-if [[ $tmp_part_exists == "true" ]]; then
+if [[ "$tmp_part_exists" == "true" ]]; then
     if [[ "$separate_tmp_part_filesystem" == "ext4" ]]; then
         yes | mkfs.ext4 "$separate_tmp_part"
+        mkdir -p /mnt/tmp
+        mount "$separate_tmp_part" /mnt/tmp
     elif [[ "$separate_tmp_part_filesystem" == "ext3" ]]; then
         yes | mkfs.ext3 "$separate_tmp_part"
+        mkdir -p /mnt/tmp
+        mount "$separate_tmp_part" /mnt/tmp
     elif [[ "$separate_tmp_part_filesystem" == "ext2" ]]; then
         yes | mkfs.ext2 "$separate_tmp_part"
+        mkdir -p /mnt/tmp
+        mount "$separate_tmp_part" /mnt/tmp
     elif [[ "$separate_tmp_part_filesystem" == "btrfs" ]]; then
         yes | mkfs.btrfs "$separate_tmp_part"
+        mkdir -p /mnt/tmp
+        btrfs subvolume create /mnt/@tmp
+        umount /mnt/tmp
+        mount -o compress=zstd,subvol=@tmp "$separate_tmp_part" /mnt/tmp
     elif [[ "$separate_tmp_part_filesystem" == "xfs" ]]; then
         yes | mkfs.xfs "$separate_tmp_part"
+        mkdir -p /mnt/tmp
+        mount "$separate_tmp_part" /mnt/tmp
     else
         echo "Error: wrong filesystem for the /tmp partition."
     fi
-    mkdir -p /mnt/tmp
-    mount "$separate_tmp_part" /mnt/tmp
 fi
 
 if [[ "$boot_mode" == "UEFI" ]]; then
@@ -384,6 +547,7 @@ elif [[ "$boot_mode" == "BIOS" ]]; then
 fi
 
 ## Verify if the system is connected to the Internet
+echo "Checking the Internet connection..."
 ping -c 4 8.8.8.8 > /dev/null 2>&1
 if ! [[ $? -eq 0 ]]; then
     ping -c 4 1.1.1.1 > /dev/null 2>&1
@@ -445,7 +609,24 @@ cat <<'EOFile' > main.sh
 
 ## Define a signal handler for interruption signals
 interrupt_handler() {
-    echo "Interruption signal received. Aborting... "
+    echo "Interruption signal received. Aborting..."
+    echo "Unmounting partitions..."
+    if [[ "$home_part_exists" == "true" ]]; then
+        umount /mnt/home
+    fi
+    if [[ "$var_part_exists" == "true" ]]; then
+        umount /mnt/var
+    fi
+    if [[ "$usr_part_exists" == "true" ]]; then
+        umount /mnt/usr
+    fi
+    if [[ "$tmp_part_exists" == "true" ]]; then
+        umount /mnt/tmp
+    fi
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        umount /mnt"$efi_part_mountpoint"
+    fi
+    umount /mnt
     exit
 }
 
