@@ -131,6 +131,8 @@ if [[ -e "config.conf" ]]; then
             fi
         done
 
+        echo ""
+
         source "$cwd"/config.conf
     fi
 else
