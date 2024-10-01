@@ -65,8 +65,7 @@ if [[ -e "config.conf" ]]; then
         fi
 
         if [[ "$luks_encryption" == "yes" ]]; then
-            echo "Disk encryption enabled"
-            echo "Disk encryption passphrase: $luks_passphrase"
+            echo "Disk encryption enabled with passphrase: $luks_passphrase"
         else
             echo "Disk encryption disabled"
         fi
