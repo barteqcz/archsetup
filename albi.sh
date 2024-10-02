@@ -737,9 +737,9 @@ elif [[ "$gpu" == "intel" ]]; then
 elif [[ "$gpu" == "nvidia" ]]; then
     pacman -S nvidia nvidia-settings --noconfirm
     if grep -q "^GRUB_CMDLINE_LINUX=\"\"" /etc/default/grub; then
-        sed -i "s|^\(GRUB_CMDLINE_LINUX=\"\)\(.*\)\"|\1nvidia-drm.modeset=1 nvidia_drm.fbdev=1\"|" /etc/default/grub
+        sed -i "s|^\(GRUB_CMDLINE_LINUX=\"\)\(.*\)\"|\1nvidia-drm.modeset=1 nvidia-drm.fbdev=1\"|" /etc/default/grub
     else
-        sed -i "s|^\(GRUB_CMDLINE_LINUX=\".*\)\"|\1 nvidia-drm.modeset=1 nvidia_drm.fbdev=1\"|" /etc/default/grub
+        sed -i "s|^\(GRUB_CMDLINE_LINUX=\".*\)\"|\1 nvidia-drm.modeset=1 nvidia-drm.fbdev=1\"|" /etc/default/grub
     fi
     grub-mkconfig -o /boot/grub/grub.cfg
 elif [[ "$gpu" == "other" ]]; then
