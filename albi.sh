@@ -121,6 +121,7 @@ if [[ -e "config.conf" ]]; then
             read -rp "Do you want to start the installation? [Y/n] " response
 
             if [[ "$response" == "Y" || "$response" == "y" || "$response" == "" ]]; then
+                clear
                 break
             elif [[ "$response" == "N" || "$response" == "n" ]]; then
                 echo "Aborting..."
