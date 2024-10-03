@@ -183,7 +183,9 @@ mirror_location="none"  #### Country for mirror servers (comma-separated list of
 timezone="Europe/Prague"  #### System time zone
 
 ### Hostname and User
-hostname="changeme"  #### Machine name
+EOF
+echo "hostname=\"$(dmidecode -s system-product-name)\"  #### Machine name"
+cat <<EOF >> config.conf
 username="changeme"  #### User name
 full_username="Changeme Please"  #### Full user name (optional - leave empty if you don't want it)
 password="changeme"  #### User password
