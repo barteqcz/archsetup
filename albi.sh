@@ -121,6 +121,7 @@ if [[ -e "config.conf" ]]; then
             read -rp "Do you want to start the installation? [Y/n] " response
 
             if [[ "$response" == "Y" || "$response" == "y" || "$response" == "" ]]; then
+                clear
                 break
             elif [[ "$response" == "N" || "$response" == "n" ]]; then
                 echo "Aborting..."
@@ -182,7 +183,9 @@ mirror_location="none"  #### Country for mirror servers (comma-separated list of
 timezone="Europe/Prague"  #### System time zone
 
 ### Hostname and User
-hostname="changeme"  #### Machine name
+EOF
+echo "hostname=\"$(dmidecode -s system-product-name)\"  #### Machine name" >> config.conf
+cat <<EOF >> config.conf
 username="changeme"  #### User name
 full_username="Changeme Please"  #### Full user name (optional - leave empty if you don't want it)
 password="changeme"  #### User password
