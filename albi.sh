@@ -184,7 +184,7 @@ timezone="Europe/Prague"  #### System time zone
 
 ### Hostname and User
 EOF
-echo "hostname=\"$(dmidecode -s system-product-name)\"  #### Machine name"
+echo "hostname=\"$(dmidecode -s system-product-name)\"  #### Machine name" >> config.conf
 cat <<EOF >> config.conf
 username="changeme"  #### User name
 full_username="Changeme Please"  #### Full user name (optional - leave empty if you don't want it)
