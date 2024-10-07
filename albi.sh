@@ -28,7 +28,6 @@ if [[ -e "config.conf" ]]; then
         source "$cwd"/config.conf
         echo "Are these information correct?"
         echo ""
-        echo ""
 
         echo "/ partition filesystem: $root_part_filesystem"
         echo "/ partition mountpoint: $root_part"
