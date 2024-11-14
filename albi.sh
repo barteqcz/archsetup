@@ -727,8 +727,10 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
     pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
+    systemctl --global enable pipewire pipewire-pulse wireplumber
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio --noconfirm
+    systemctl --global enable pulseaudio
 fi
 
 ## Install the selected graphics driver (proceed with any additional configuration if needed)
@@ -785,22 +787,6 @@ if [[ "$install_cups" == yes ]]; then
     rm -f /usr/share/applications/hplip.desktop
     rm -f /usr/share/applications/hp-uiscan.desktop
 fi
-
-## Run user-specific actions
-touch tmpscript.sh
-cat <<'EOY' > tmpscript.sh
-source /config.conf
-cd
-if [[ "$audio_server" == "pipewire" ]]; then
-    systemctl --global enable pipewire pipewire-pulse wireplumber
-elif [[ "$audio_server" == "pulseaudio" ]]; then
-    systemctl --global enable pulseaudio
-fi
-EOY
-chown "$username":"$username" tmpscript.sh
-echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/tmp
-sudo -u "$username" bash tmpscript.sh
-rm -f /etc/sudoers.d/tmp
 
 ## Add sudo privileges for the user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
