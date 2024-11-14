@@ -792,9 +792,9 @@ cat <<'EOY' > tmpscript.sh
 source /config.conf
 cd
 if [[ "$audio_server" == "pipewire" ]]; then
-    systemctl --user enable pipewire pipewire-pulse wireplumber
+    systemctl --global enable pipewire pipewire-pulse wireplumber
 elif [[ "$audio_server" == "pulseaudio" ]]; then
-    systemctl --user enable pulseaudio
+    systemctl --global enable pulseaudio
 fi
 EOY
 chown "$username":"$username" tmpscript.sh
