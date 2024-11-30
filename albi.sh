@@ -302,6 +302,7 @@ if [[ "$root_part" != "none" ]]; then
         if [[ -e "$root_part" ]]; then
             if [[ "$luks_encryption" == "yes" ]]; then
                 if [[ "$boot_part_exists" == "true" ]]; then
+                    echo "Setting up the encryption..."
                     root_part_orig="$root_part"
                     root_part_basename=$(basename "$root_part")
                     root_part_encrypted_name="${root_part_basename}_crypt"
