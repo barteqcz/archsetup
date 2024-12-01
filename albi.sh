@@ -433,9 +433,6 @@ if [[ "$boot_part_exists" == "true" ]]; then
         yes | mkfs.btrfs -f "$separate_boot_part"
         mkdir -p /mnt/boot
         mount "$separate_boot_part" /mnt/boot
-        btrfs subvolume create /mnt/@boot
-        umount /mnt/boot
-        mount -o compress=zstd,subvol=@boot "$separate_boot_part" /mnt/boot
     elif [[ "$separate_boot_part_filesystem" == "xfs" ]]; then
         yes | mkfs.xfs "$separate_boot_part"
         mkdir -p /mnt/boot
