@@ -794,6 +794,10 @@ sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 
 ## If enabled, set up a swapfile for the system
 if [[ "$create_swapfile" == "yes" ]]; then
+    if [[ "$root_part_filesystem" == "btrfs" ]]; then
+        truncate -s 0 /swapfile
+        chattr +C /swapfile
+    fi
     fallocate -l "$swapfile_size_gb"G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
