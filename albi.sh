@@ -329,7 +329,7 @@ if [[ "$root_part" != "none" ]]; then
             elif [[ "$root_part_filesystem" == "btrfs" ]]; then
                 yes | mkfs.btrfs -f "$root_part"
                 mount "$root_part" /mnt
-                btrfs subvolume create /mnt/@
+                btrfs subvolume create @
                 umount /mnt
                 mount -o compress=zstd,subvol=@ "$root_part" /mnt
             elif [[ "$root_part_filesystem" == "xfs" ]]; then
@@ -404,7 +404,7 @@ if [[ "$home_part_exists" == "true" ]]; then
         yes | mkfs.btrfs -f "$separate_home_part"
         mkdir -p /mnt/home
         mount "$separate_home_part" /mnt/home
-        btrfs subvolume create /mnt/@home
+        btrfs subvolume create @home
         umount /mnt/home
         mount -o compress=zstd,subvol=@home "$separate_home_part" /mnt/home
     elif [[ "$separate_home_part_filesystem" == "xfs" ]]; then
@@ -433,7 +433,7 @@ if [[ "$boot_part_exists" == "true" ]]; then
         yes | mkfs.btrfs -f "$separate_boot_part"
         mkdir -p /mnt/boot
         mount "$separate_boot_part" /mnt/boot
-        btrfs subvolume create /mnt/@boot
+        btrfs subvolume create @boot
         umount /mnt/boot
         mount -o compress=zstd,subvol=@boot "$separate_boot_part" /mnt/boot
     elif [[ "$separate_boot_part_filesystem" == "xfs" ]]; then
@@ -462,7 +462,7 @@ if [[ "$var_part_exists" == "true" ]]; then
         yes | mkfs.btrfs -f "$separate_var_part"
         mkdir -p /mnt/var
         mount "$separate_var_part" /mnt/var
-        btrfs subvolume create /mnt/@var
+        btrfs subvolume create @var
         umount /mnt/var
         mount -o compress=zstd,subvol=@var "$separate_var_part" /mnt/var
     elif [[ "$separate_var_part_filesystem" == "xfs" ]]; then
@@ -491,7 +491,7 @@ if [[ "$usr_part_exists" == "true" ]]; then
         yes | mkfs.btrfs -f "$separate_usr_part"
         mkdir -p /mnt/usr
         mount "$separate_usr_part" /mnt/usr
-        btrfs subvolume create /mnt/@usr
+        btrfs subvolume create @usr
         umount /mnt/usr
         mount -o compress=zstd,subvol=@usr "$separate_usr_part" /mnt/usr
     elif [[ "$separate_usr_part_filesystem" == "xfs" ]]; then
@@ -520,7 +520,7 @@ if [[ "$tmp_part_exists" == "true" ]]; then
         yes | mkfs.btrfs -f "$separate_tmp_part"
         mkdir -p /mnt/tmp
         mount "$separate_tmp_part" /mnt/tmp
-        btrfs subvolume create /mnt/@tmp
+        btrfs subvolume create @tmp
         umount /mnt/tmp
         mount -o compress=zstd,subvol=@tmp "$separate_tmp_part" /mnt/tmp
     elif [[ "$separate_tmp_part_filesystem" == "xfs" ]]; then
