@@ -327,7 +327,7 @@ if [[ "$root_part" != "none" ]]; then
                 yes | mkfs.ext2 "$root_part"
                 mount "$root_part" /mnt
             elif [[ "$root_part_filesystem" == "btrfs" ]]; then
-                yes | mkfs.btrfs "$root_part"
+                yes | mkfs.btrfs -f "$root_part"
                 mount "$root_part" /mnt
                 btrfs subvolume create /mnt/@
                 umount /mnt
@@ -401,7 +401,7 @@ if [[ "$home_part_exists" == "true" ]]; then
         mkdir -p /mnt/home
         mount "$separate_home_part" /mnt/home
     elif [[ "$separate_home_part_filesystem" == "btrfs" ]]; then
-        yes | mkfs.btrfs "$separate_home_part"
+        yes | mkfs.btrfs -f "$separate_home_part"
         mkdir -p /mnt/home
         btrfs subvolume create /mnt/@home
         umount /mnt/home
@@ -429,7 +429,7 @@ if [[ "$boot_part_exists" == "true" ]]; then
         mkdir -p /mnt/boot
         mount "$separate_boot_part" /mnt/boot
     elif [[ "$separate_boot_part_filesystem" == "btrfs" ]]; then
-        yes | mkfs.btrfs "$separate_boot_part"
+        yes | mkfs.btrfs -f "$separate_boot_part"
         mkdir -p /mnt/boot
         btrfs subvolume create /mnt/@boot
         umount /mnt/boot
@@ -457,7 +457,7 @@ if [[ "$var_part_exists" == "true" ]]; then
         mkdir -p /mnt/var
         mount "$separate_var_part" /mnt/var
     elif [[ "$separate_var_part_filesystem" == "btrfs" ]]; then
-        yes | mkfs.btrfs "$separate_var_part"
+        yes | mkfs.btrfs -f "$separate_var_part"
         mkdir -p /mnt/var
         btrfs subvolume create /mnt/@var
         umount /mnt/var
@@ -485,7 +485,7 @@ if [[ "$usr_part_exists" == "true" ]]; then
         mkdir -p /mnt/usr
         mount "$separate_usr_part" /mnt/usr
     elif [[ "$separate_usr_part_filesystem" == "btrfs" ]]; then
-        yes | mkfs.btrfs "$separate_usr_part"
+        yes | mkfs.btrfs -f "$separate_usr_part"
         mkdir -p /mnt/usr
         btrfs subvolume create /mnt/@usr
         umount /mnt/usr
@@ -513,7 +513,7 @@ if [[ "$tmp_part_exists" == "true" ]]; then
         mkdir -p /mnt/tmp
         mount "$separate_tmp_part" /mnt/tmp
     elif [[ "$separate_tmp_part_filesystem" == "btrfs" ]]; then
-        yes | mkfs.btrfs "$separate_tmp_part"
+        yes | mkfs.btrfs -f "$separate_tmp_part"
         mkdir -p /mnt/tmp
         btrfs subvolume create /mnt/@tmp
         umount /mnt/tmp
