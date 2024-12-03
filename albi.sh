@@ -26,6 +26,7 @@ if [[ -e "config.conf" ]]; then
         exit
     else
         source "$cwd"/config.conf
+        clear
         echo "Are these information correct?"
         echo ""
 
