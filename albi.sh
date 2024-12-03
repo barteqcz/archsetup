@@ -29,49 +29,41 @@ if [[ -e "config.conf" ]]; then
         echo "Are these information correct?"
         echo ""
 
-        echo "/ partition filesystem: $root_part_filesystem"
-        echo "/ partition mountpoint: $root_part"
+        echo "/: $root_part_filesystem on $root_part"
 
         if [[ "$separate_home_part" != "none" ]]; then
             if [[ "$separate_home_part_filesystem" != "none" ]]; then
-                echo "/home partition filesystem: $separate_home_part_filesystem"
+                echo "/home: $separate_home_part_filesystem on $separate_home_part"
             fi
-            echo "/home partition mountpoint: $separate_home_part"
+            echo "Error: a partition has been selected for /home, but the filesystem is not specified."
         fi
         if [[ "$separate_boot_part" != "none" ]]; then
             if [[ "$separate_boot_part_filesystem" != "none" ]]; then
-                echo "/boot partition filesystem: $separate_boot_part_filesystem"
+                echo "/boot: $separate_boot_part_filesystem on $separate_boot_part"
             fi
-            echo "/boot partition mountpoint: $separate_boot_part"
+            echo "Error: a partition has been selected for /boot, but the filesystem is not specified."
         fi
         if [[ "$separate_var_part" != "none" ]]; then
             if [[ "$separate_var_part_filesystem" != "none" ]]; then
-                echo "/var partition filesystem: $separate_var_part_filesystem"
+                echo "/var: $separate_var_part_filesystem on $separate_var_part"
             fi
-            echo "/var partition mountpoint: $separate_var_part"
-        fi
-        if [[ "$separate_usr_part" != "none" ]]; then
-            if [[ "$separate_usr_part_filesystem" != "none" ]]; then
-                echo "/usr partition filesystem: $separate_usr_part_filesystem"
-            fi
-            echo "/usr partition mountpoint: $separate_usr_part"
+            echo "Error: a partition has been selected for /var, but the filesystem is not specified."
         fi
         if [[ "$separate_tmp_part" != "none" ]]; then
             if [[ "$separate_tmp_part_filesystem" != "none" ]]; then
-                echo "/tmp partition filesystem: $separate_tmp_part_filesystem"
+                echo "/home: $separate_tmp_part_filesystem on $separate_tmp_part"
             fi
-            echo "/tmp partition mountpoint: $separate_tmp_part"
+            echo "Error: a partition has been selected for /tmp, but the filesystem is not specified."
         fi
 
         if [[ "$luks_encryption" == "yes" ]]; then
-            echo "Disk encryption enabled with passphrase: $luks_passphrase"
+            echo "Disk encryption is enabled with passphrase: $luks_passphrase"
         else
-            echo "Disk encryption disabled"
+            echo "Disk encryption is disabled"
         fi
 
         if [[ "$boot_mode" == "UEFI" ]]; then
-            echo "EFI partition: $efi_part"
-            echo "EFI partition mountpoint: $efi_part_mountpoint"
+            echo "EFI partition: $efi_part at $efi_part_mountpoint"
         else
             echo "GRUB disk: $grub_disk"
         fi
@@ -144,7 +136,6 @@ root_part_filesystem="ext4"  #### Filesystem for the / partition
 separate_home_part_filesystem="none"  #### Filesystem for the /home partition
 separate_boot_part_filesystem="ext4"  #### Filesystem for the /boot partition
 separate_var_part_filesystem="none"  #### Filesystem for the /var partition
-separate_usr_part_filesystem="none"  #### Filesystem for the /usr partition
 separate_tmp_part_filesystem="none"  #### Filesystem for the /tmp partition
 
 ### Mounting
@@ -152,7 +143,6 @@ root_part="/dev/sdX#"  #### Path for the / partition
 separate_home_part="none"  #### Path for the /home partition
 separate_boot_part="/dev/sdX#"  #### Path for the /boot partition
 separate_var_part="none"  #### Path for the /var partition
-separate_usr_part="none"  #### Path for the /usr partition
 separate_tmp_part="none"  #### Path for the /tmp partition
 
 ### Encryption
@@ -367,15 +357,6 @@ if [[ "$separate_var_part" != "none" ]]; then
     fi
 fi
 
-if [[ "$separate_usr_part" != "none" ]]; then
-    if [[ -e "$separate_usr_part" ]]; then
-        usr_part_exists="true"
-    else
-        echo "Error: partition $separate_usr_part isn't a valid path - it doesn't exist or isn't accessible."
-        exit
-    fi
-fi
-
 if [[ "$separate_tmp_part" != "none" ]]; then
     if [[ -e "$separate_tmp_part" ]]; then
         tmp_part_exists="true"
@@ -462,35 +443,6 @@ if [[ "$var_part_exists" == "true" ]]; then
         mount "$separate_var_part" /mnt/var
     else
         echo "Error: wrong filesystem for the /var partition."
-    fi
-fi
-
-if [[ "$usr_part_exists" == "true" ]]; then
-    if [[ "$separate_usr_part_filesystem" == "ext4" ]]; then
-        yes | mkfs.ext4 "$separate_usr_part"
-        mkdir -p /mnt/usr
-        mount "$separate_usr_part" /mnt/usr
-    elif [[ "$separate_usr_part_filesystem" == "ext3" ]]; then
-        yes | mkfs.ext3 "$separate_usr_part"
-        mkdir -p /mnt/usr
-        mount "$separate_usr_part" /mnt/usr
-    elif [[ "$separate_usr_part_filesystem" == "ext2" ]]; then
-        yes | mkfs.ext2 "$separate_usr_part"
-        mkdir -p /mnt/usr
-        mount "$separate_usr_part" /mnt/usr
-    elif [[ "$separate_usr_part_filesystem" == "btrfs" ]]; then
-        yes | mkfs.btrfs -f "$separate_usr_part"
-        mkdir -p /mnt/usr
-        mount "$separate_usr_part" /mnt/usr
-        btrfs subvolume create /mnt/@usr
-        umount /mnt/usr
-        mount -o compress=zstd "$separate_usr_part" /mnt/usr
-    elif [[ "$separate_usr_part_filesystem" == "xfs" ]]; then
-        yes | mkfs.xfs "$separate_usr_part"
-        mkdir -p /mnt/usr
-        mount "$separate_usr_part" /mnt/usr
-    else
-        echo "Error: wrong filesystem for the /usr partition."
     fi
 fi
 
