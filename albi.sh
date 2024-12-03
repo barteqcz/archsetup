@@ -132,7 +132,7 @@ else
     cat <<EOF > config.conf
 ## Installation Configuration
 
-### Formatting
+### Formatting (will be ignored even if not set to "none", unless the corresponding partition is enabled)
 root_part_filesystem="ext4"  #### Filesystem for the / partition
 separate_home_part_filesystem="none"  #### Filesystem for the /home partition
 separate_boot_part_filesystem="ext4"  #### Filesystem for the /boot partition
