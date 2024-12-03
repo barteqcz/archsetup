@@ -91,7 +91,7 @@ if [[ -e "config.conf" ]]; then
         if [[ "$custom_packages" != "" ]]; then
             echo "Custom packages: $custom_packages"
         else
-            echo "No custom packages are defined"
+            echo "No custom packages were defined"
         fi
 
         if [[ "$create_swapfile" == "yes" ]]; then
