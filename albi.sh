@@ -58,7 +58,7 @@ if [[ -e "config.conf" ]]; then
         fi
 
         if [[ "$luks_encryption" == "yes" ]]; then
-            echo "Disk encryption is enabled with passphrase: $luks_passphrase"
+            echo "Disk encryption is enabled with a passphrase $luks_passphrase"
         else
             echo "Disk encryption is disabled"
         fi
@@ -83,28 +83,28 @@ if [[ -e "config.conf" ]]; then
         echo "Desktop environment: $de"
         
         if [[ "$install_cups" == "yes" ]]; then
-            echo "CUPS installation enabled"
+            echo "CUPS installation is enabled"
         else
-            echo "CUPS installation disabled"
+            echo "CUPS installation is disabled"
         fi
         
         if [[ "$custom_packages" != "" ]]; then
             echo "Custom packages: $custom_packages"
         else
-            echo "No custom packages defined"
+            echo "No custom packages are defined"
         fi
 
         if [[ "$create_swapfile" == "yes" ]]; then
-            echo "Swapfile creation enabled"
+            echo "Swapfile creation is enabled"
             echo "Swapfile size (GB): $swapfile_size_gb"
         else
-            echo "Swapfile creation disabled"
+            echo "Swapfile creation is disabled"
         fi
 
         if [[ "$keep_config" == "yes" ]]; then
-            echo "Config file will be kept in the user directory"
+            echo "Config file will be kept in the user directory."
         else
-            echo "Config file won't be kept in the user directory"
+            echo "Config file won't be kept in the user directory."
         fi
 
         echo ""
@@ -119,7 +119,7 @@ if [[ -e "config.conf" ]]; then
                 echo "Aborting..."
                 exit
             else
-                echo "Incorrect option. Please try again"
+                echo "Error: incorrect option. Please try again"
             fi
         done
 
