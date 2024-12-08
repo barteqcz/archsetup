@@ -20,7 +20,11 @@ An Arch Linux Bash Installer, with an easily customizable installation process u
 ### Downloading
 To download the entire repository, including both the source file and documentation, you can reach it using `git` (remember to install it first).
 
-`git clone https://github.com/barteqcz/albi`
+`git clone https://github.com/barteqcz/ALBI` (which doesn't work for me recently)
+
+you can also use `curl` which is available by default
+
+`curl -o albi.sh https://raw.githubusercontent.com/barteqcz/ALBI/stable/albi.sh`
 
 If you prefer a more 'hands-on' approach, you have the option to manually download the desired files. With this method, you can also create and maintain a single adjusted configuration file that can be easily transferred between different PCs using a USB drive, or using a network server (what is more convenient than using an USB drive). This way, you can streamline the installation process across multiple machines, saving time and effort during the installation process.
 
