@@ -35,26 +35,30 @@ if [[ -e "config.conf" ]]; then
         if [[ "$separate_home_part" != "none" ]]; then
             if [[ "$separate_home_part_filesystem" != "none" ]]; then
                 echo "/home: $separate_home_part_filesystem on $separate_home_part"
+            else
+                echo "Error: a partition has been selected for /home, but the filesystem is not specified."
             fi
-            echo "Error: a partition has been selected for /home, but the filesystem is not specified."
         fi
         if [[ "$separate_boot_part" != "none" ]]; then
             if [[ "$separate_boot_part_filesystem" != "none" ]]; then
                 echo "/boot: $separate_boot_part_filesystem on $separate_boot_part"
+            else
+                echo "Error: a partition has been selected for /boot, but the filesystem is not specified."
             fi
-            echo "Error: a partition has been selected for /boot, but the filesystem is not specified."
         fi
         if [[ "$separate_var_part" != "none" ]]; then
             if [[ "$separate_var_part_filesystem" != "none" ]]; then
                 echo "/var: $separate_var_part_filesystem on $separate_var_part"
+            else
+                echo "Error: a partition has been selected for /var, but the filesystem is not specified."
             fi
-            echo "Error: a partition has been selected for /var, but the filesystem is not specified."
         fi
         if [[ "$separate_tmp_part" != "none" ]]; then
             if [[ "$separate_tmp_part_filesystem" != "none" ]]; then
                 echo "/home: $separate_tmp_part_filesystem on $separate_tmp_part"
+            else
+                echo "Error: a partition has been selected for /tmp, but the filesystem is not specified."
             fi
-            echo "Error: a partition has been selected for /tmp, but the filesystem is not specified."
         fi
 
         if [[ "$luks_encryption" == "yes" ]]; then
