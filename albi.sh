@@ -1,6 +1,5 @@
 #!/bin/bash
 
-## Interruption handler
 interrupt_handler() {
     echo "Interruption signal received. Aborting... "
     exit
@@ -8,17 +7,14 @@ interrupt_handler() {
 
 trap interrupt_handler SIGINT
 
-## Detect current working directory and save it to a variable
 cwd=$(pwd)
 
-## Detect the system boot mode
 if [[ -d "/sys/firmware/efi/" ]]; then
     boot_mode="UEFI"
 else
     boot_mode="BIOS"
 fi
 
-## Create configuration file or check the existing one for errors
 if [[ -e "config.conf" ]]; then
     output=$(bash -n "$cwd"/config.conf 2>&1)
     if [[ -n "$output" ]]; then
@@ -92,12 +88,6 @@ if [[ -e "config.conf" ]]; then
             echo "CUPS installation is disabled"
         fi
         
-        if [[ "$custom_packages" != "" ]]; then
-            echo "Custom packages: $custom_packages"
-        else
-            echo "No custom packages were defined"
-        fi
-
         if [[ "$create_swapfile" == "yes" ]]; then
             echo "Swapfile creation is enabled"
             echo "Swapfile size (GB): $swapfile_size_gb"
@@ -193,7 +183,6 @@ audio_server="pipewire"  #### Audio server (pulseaudio/pipewire/none)
 gpu="amd"  #### GPU driver (amd/intel/nvidia/other)
 de="plasma"  #### Desktop environment (gnome/plasma/xfce/mate/cinnamon/none)
 install_cups="yes"  #### Install CUPS (yes/no)
-custom_packages="htop"  #### Custom packages (space-separated list or empty)
 
 ### Swapfile
 create_swapfile="yes"  #### Create swapfile (yes/no)
@@ -207,7 +196,6 @@ echo "config.conf was generated successfully. Edit it to customize the installat
 exit
 fi
 
-## Verify the values in the configuration file to ensure correct settings
 passwd_length=${#password}
 username_length=${#username}
 luks_passphrase_length=${#luks_passphrase}
@@ -276,7 +264,6 @@ if ! grep -qF "$language" "/etc/locale.gen"; then
     exit
 fi
 
-## Validate the existence of the specified partitions before proceeding
 mount_output=$(df -h)
 mount_partition=$(echo "$mount_output" | awk '$6=="/mnt" {print $1}')
 
@@ -501,7 +488,6 @@ elif [[ "$boot_mode" == "BIOS" ]]; then
     fi
 fi
 
-## Verify if the system is connected to the Internet
 echo "Checking the Internet connection..."
 ping -c 4 8.8.8.8 > /dev/null 2>&1
 if ! [[ $? -eq 0 ]]; then
@@ -519,7 +505,6 @@ if ! [[ $? -eq 0 ]]; then
     fi
 fi
 
-## Verify if the reflector command execution encounters any errors
 if [[ "$mirror_location" != "none" ]]; then
     reflector_output=$(reflector --country "$mirror_location")
     if [[ "$reflector_output" == *"error"* || "$reflector_output" == *"no mirrors found"* ]]; then
@@ -530,22 +515,6 @@ if [[ "$mirror_location" != "none" ]]; then
     fi
 fi
 
-## Determine if there are any custom packages specified for installation
-if ! [[ -z "$custom_packages" ]]; then
-    pacman -Sy
-
-    IFS=" " read -ra packages <<< "$custom_packages"
-
-    for package in "${packages[@]}"; do
-        pacman_output=$(pacman -Ss "$package")
-        if ! [[ -n "$pacman_output" ]]; then
-            echo "Error: package $package not found."
-            exit
-        fi
-    done
-fi
-
-## Install the base system packages based on the selected kernel variant
 if [[ "$kernel_variant" == "normal" ]]; then
     pacstrap -K /mnt base linux linux-firmware linux-headers
 elif [[ "$kernel_variant" == "lts" ]]; then
@@ -554,15 +523,12 @@ elif [[ "$kernel_variant" == "zen" ]]; then
     pacstrap -K /mnt base linux-zen linux-firmware linux-zen-headers
 fi
 
-## Automatically generate /etc/fstab based on the mounted partitions
 genfstab -U /mnt >> /mnt/etc/fstab
 
-## Create a temporary script to handle the main part of the installation process
 touch main.sh
 cat <<'EOFile' > main.sh
 #!/bin/bash
 
-## Define a signal handler for interruption signals
 interrupt_handler() {
     echo "Interruption signal received. Aborting..."
     echo "Unmounting partitions..."
@@ -587,22 +553,18 @@ interrupt_handler() {
 
 trap interrupt_handler SIGINT
 
-## Source the configuration file
 source /config.conf
 if [[ "$luks_encryption" == "yes" ]]; then
     source /tmpfile.sh
 fi
 
-## Set the system timezone and synchronize hardware clock
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 hwclock --systohc
 
-## Install essential system packages and enable services
 pacman -Sy btrfs-progs dosfstools inetutils xfsprogs base-devel bash-completion bluez bluez-utils nano git grub ntfs-3g sshfs networkmanager dnsmasq wget exfatprogs usbutils xdg-utils xdg-user-dirs unzip unrar zip 7zip os-prober plymouth --noconfirm
 systemctl enable NetworkManager
 systemctl enable bluetooth
 
-## Determine the system's boot mode (UEFI or BIOS)
 if [[ -d "/sys/firmware/efi/" ]]; then
     boot_mode="UEFI"
     pacman -S efibootmgr --noconfirm
@@ -610,7 +572,6 @@ else
     boot_mode="BIOS"
 fi
 
-## Identify the CPU vendor and install the corresponding microcode package
 vendor=$(grep -m1 vendor_id /proc/cpuinfo | cut -d ':' -f2 | tr -d '[:space:]')
 if [[ "$vendor" == "GenuineIntel" ]]; then
     pacman -Sy intel-ucode --noconfirm
@@ -618,7 +579,6 @@ elif [[ "$vendor" == "AuthenticAMD" ]]; then
     pacman -Sy amd-ucode --noconfirm
 fi
 
-## Configure system locales, console keyboard layout, and hostname
 if [[ "$language" != "en_US.UTF-8" ]]; then
     sed -i "/en_US.UTF-8 UTF-8/s/^#//" /etc/locale.gen
 fi
@@ -628,7 +588,6 @@ echo "KEYMAP=$tty_keyboard_layout" > /etc/vconsole.conf
 echo "$hostname" > /etc/hostname
 locale-gen
 
-## Configure the /etc/hosts file for local hostname resolution
 echo "127.0.0.1       localhost" >> /etc/hosts
 echo "127.0.1.1       $hostname" >> /etc/hosts
 echo "" >> /etc/hosts
@@ -637,7 +596,6 @@ echo "::1             localhost ip6-localhost ip6-loopback" >> /etc/hosts
 echo "ff02::1         ip6-allnodes" >> /etc/hosts
 echo "ff02::2         ip6-allrouters" >> /etc/hosts
 
-## Create an user
 useradd -m "$username"
 echo "$password" | passwd "$username" --stdin
 if [[ "$full_username" != "" ]]; then
@@ -645,7 +603,6 @@ if [[ "$full_username" != "" ]]; then
 fi
 usermod -aG wheel "$username"
 
-## Apply system tweaks for enhanced usability
 cln=$(grep -n "Color" /etc/pacman.conf | cut -d ':' -f1)
 dln=$(grep -n "## Defaults specification" /etc/sudoers | cut -d ':' -f1)
 sed -i 's/^# include \/usr\/share\/nano\/\*\.nanorc/include \/usr\/share\/nano\/\*\.nanorc/' /etc/nanorc
@@ -654,14 +611,12 @@ sed -i "${cln}s/$/\nILoveCandy/" /etc/pacman.conf
 sed -i "${dln}s/$/\nDefaults    pwfeedback/" /etc/sudoers
 sed -i "${dln}s/$/\n##/" /etc/sudoers
 
-## Install GRUB bootloader based on the detected boot mode
 if [[ "$boot_mode" == "UEFI" ]]; then
     grub-install --target=x86_64-efi --efi-directory=$efi_part_mountpoint --bootloader-id="archlinux"
 elif [[ "$boot_mode" == "BIOS" ]]; then
     grub-install --target=i386-pc "$grub_disk"
 fi
 
-## Configure mkinitcpio and GRUB
 if [[ "$luks_encryption" == "yes" ]]; then
     cryptdevice_grub=$(blkid -s UUID -o value "$root_part_orig")
     sed -i 's/HOOKS=.*/HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block plymouth sd-encrypt filesystems fsck)/' /etc/mkinitcpio.conf
@@ -676,7 +631,6 @@ fi
 
 grub-mkconfig -o /boot/grub/grub.cfg
 
-## Install the selected audio server and enable related services
 if [[ "$audio_server" == "pipewire" ]]; then
     pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
     systemctl --global enable pipewire pipewire-pulse wireplumber
@@ -685,7 +639,6 @@ elif [[ "$audio_server" == "pulseaudio" ]]; then
     systemctl --global enable pulseaudio
 fi
 
-## Install the selected graphics driver (proceed with any additional configuration if needed)
 if [[ "$gpu" == "amd" ]]; then
     pacman -S mesa vulkan-radeon libva-mesa-driver mesa-vdpau --noconfirm
 elif [[ "$gpu" == "intel" ]]; then
@@ -702,7 +655,6 @@ elif [[ "$gpu" == "other" ]]; then
     pacman -S mesa libva-mesa-driver mesa-vdpau --noconfirm
 fi
 
-## Install the selected desktop environment along with related packages
 if [[ "$de" == "gnome" ]]; then
     pacman -S xorg wayland --noconfirm
     pacman -S gnome nautilus noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra gnome-tweaks gnome-shell-extensions gvfs gdm gnome-browser-connector power-profiles-daemon --noconfirm
@@ -729,7 +681,6 @@ elif [[ "$de" == "mate" ]]; then
     systemctl enable lightdm
 fi
 
-## If required, install CUPS and its related components
 if [[ "$install_cups" == yes ]]; then
     pacman -S cups cups-browsed cups-filters cups-pk-helper bluez-cups foomatic-db foomatic-db-engine foomatic-db-gutenprint-ppds foomatic-db-nonfree foomatic-db-nonfree-ppds foomatic-db-ppds ghostscript gutenprint hplip nss-mdns system-config-printer --noconfirm
     systemctl enable cups
@@ -740,10 +691,8 @@ if [[ "$install_cups" == yes ]]; then
     rm -f /usr/share/applications/hp-uiscan.desktop
 fi
 
-## Add sudo privileges for the user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 
-## If enabled, set up a swapfile for the system
 if [[ "$create_swapfile" == "yes" ]]; then
     if [[ "$root_part_filesystem" == "btrfs" ]]; then
         truncate -s 0 /swapfile
@@ -756,17 +705,8 @@ if [[ "$create_swapfile" == "yes" ]]; then
     echo "/swapfile    none    swap    sw    0    0" >> /etc/fstab
 fi
 
-## Install additional packages specified by the user
-IFS=" " read -ra packages <<< "$custom_packages"
-
-for package in "${packages[@]}"; do
-    pacman -S "$package" --noconfirm
-done
-
-## Re-generate the initial ramdisk for booting the system
 mkinitcpio -P
 
-## Remove unnecessary packages and files, and exit the script
 while pacman -Qdtq; do
     pacman -Runs $(pacman -Qdtq) --noconfirm
 done
@@ -783,12 +723,11 @@ rm -f /tmpscript.sh
 exit
 EOFile
 
-## Copy configuration files and the second part of the script to the target system
 if [[ "$luks_encryption" == "yes" ]]; then
     cp tmpfile.sh /mnt/
 fi
+
 cp main.sh /mnt/
 cp config.conf /mnt/
 
-## Enter the chroot environment and execute the second part of the installation script
 arch-chroot /mnt bash main.sh
