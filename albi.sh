@@ -643,6 +643,10 @@ else
     sed -i 's/HOOKS=.*/HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block plymouth filesystems fsck)/' /etc/mkinitcpio.conf
 fi
 
+if [[ "$de" != "none" ]]; then
+    sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="[^"]*\)\(quiet\)\(.*\)"/\1\2 splash\3"/' /etc/default/grub
+fi
+
 grub-mkconfig -o /boot/grub/grub.cfg
 
 if [[ "$audio_server" == "pipewire" ]]; then
