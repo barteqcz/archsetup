@@ -15,6 +15,12 @@ else
     boot_mode="BIOS"
 fi
 
+if ls /dev/tpm* &>/dev/null; then
+    tpm2_available="yes"
+else
+    tpm2_available="no"
+fi
+
 if [[ -e "config.conf" ]]; then
     output=$(bash -n "$cwd"/config.conf 2>&1)
     if [[ -n "$output" ]]; then
@@ -59,6 +65,9 @@ if [[ -e "config.conf" ]]; then
 
         if [[ "$luks_encryption" == "yes" ]]; then
             echo "Disk encryption is enabled with a passphrase $luks_passphrase"
+            if [[ "$tpm2_luks" == "yes" ]]; then
+                echo "LUKS key will be stored in the TPM2 device."
+            fi
         else
             echo "Disk encryption is disabled"
         fi
@@ -143,14 +152,19 @@ separate_tmp_part="none"  #### Path for the /tmp partition
 ### Encryption
 luks_encryption="yes"  #### Encrypt the system (yes/no)
 luks_passphrase="4V3ryH@rdP4ssphr@s3!"  #### Passphrase for encryption
-
 EOF
 
+if [[ "$tpm2_available" == "yes" ]]; then
+    echo "tpm2_luks=\"yes\"  #### Whether or not to store the LUKS key in the TPM2 for automatic unlocking during boot (yes/no)" >> config.conf
+fi
+
 if [[ "$boot_mode" == "UEFI" ]]; then
+    echo "" >> config.conf
     echo "### EFI partition settings" >> config.conf
     echo "efi_part=\"/dev/sdX#\"  #### EFI partition path" >> config.conf
     echo "efi_part_mountpoint=\"/boot/efi\"  #### EFI partition mountpoint" >> config.conf
 else
+    echo "" >> config.conf
     echo "### GRUB installation disk settings" >> config.conf
     echo "grub_disk=\"/dev/sdX\"  #### Disk for GRUB installation" >> config.conf
 fi
@@ -168,7 +182,7 @@ timezone="Europe/Prague"  #### System time zone
 
 ### Hostname and User
 EOF
-echo "hostname=\"$(dmidecode -s system-product-name)\"  #### Machine name" >> config.conf
+echo "hostname=\"$(dmidecode -s system-product-name | sed 's/[[:space:]]*$//')\"  #### Machine name" >> config.conf
 cat <<EOF >> config.conf
 username="changeme"  #### User name
 full_username="Changeme Please"  #### Full user name (optional - leave empty if you don't want it)
@@ -294,7 +308,7 @@ if [[ "$root_part" != "none" ]]; then
                     echo "root_part_orig=\"$root_part_orig\"" > tmpfile.sh
                     echo "root_part_encrypted_name=\"$root_part_encrypted_name\"" >> tmpfile.sh
                 else
-                    echo "Error: you haven't defined a separate boot partition. It is needed in order to encrypt the / partition."
+                    echo "Error: you haven't defined a separate /boot partition. It is needed in order to encrypt the / partition."
                     exit
                 fi
             fi
@@ -691,7 +705,7 @@ if [[ "$install_cups" == yes ]]; then
     rm -f /usr/share/applications/hp-uiscan.desktop
 fi
 
-sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
+sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //g' /etc/sudoers
 
 if [[ "$create_swapfile" == "yes" ]]; then
     if [[ "$root_part_filesystem" == "btrfs" ]]; then
@@ -703,6 +717,10 @@ if [[ "$create_swapfile" == "yes" ]]; then
     mkswap /swapfile
     echo "# /swapfile" >> /etc/fstab
     echo "/swapfile    none    swap    sw    0    0" >> /etc/fstab
+fi
+
+if [[ "$tpm2_luks" == "yes" ]]; then
+    echo "$luks_passphrase" | systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto "$root_part"
 fi
 
 mkinitcpio -P
