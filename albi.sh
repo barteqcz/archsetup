@@ -261,7 +261,7 @@ if ! [[ "$create_swapfile" == "yes" || "$create_swapfile" == "no" ]]; then
     exit
 fi
 
-if ! [[ "$swapfile_size_gb" =~ ^[0-9]+$ ]]; then
+if ! [[ "$swapfile_size_gb" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
     echo "Error: invalid value for the swapfile size - the value isn't numeric."
     exit
 fi
