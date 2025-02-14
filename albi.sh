@@ -651,10 +651,10 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 if [[ "$audio_server" == "pipewire" ]]; then
     pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
-    su - "$username" -c "systemctl --user enable pipewire wireplumber"
+    systemctl --global enable pipewire wireplumber
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio --noconfirm
-    su - "$username" -c "systemctl --user enable pipewire pulseaudio"
+    systemctl --global enable pipewire pulseaudio
 fi
 
 if [[ "$gpu" == "amd" ]]; then
