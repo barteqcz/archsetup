@@ -651,10 +651,24 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 if [[ "$audio_server" == "pipewire" ]]; then
     pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber --noconfirm
-    sudo -u "$username" systemctl --user enable pipewire wireplumber
 elif [[ "$audio_server" == "pulseaudio" ]]; then
     pacman -S pulseaudio --noconfirm
-    sudo -u "$username" systemctl --user enable pulseaudio
+fi
+
+if [[ "$audio_server" != "none" ]]; then
+    touch tmpscript.sh
+    cat <<'EOY' > tmpscript.sh
+source /config.conf
+if [[ "$audio_server" == "pipewire" ]]; then
+    systemctl --user enable pipewire wireplumber
+elif [[ "$audio_server == "pulseaudio" ]]; then
+    systemctl --user enable pulseaudio
+fi
+EOY
+    chown "$username":"$username" tmpscript.sh
+    echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/tmp
+    sudo -u "$username" bash tmpscript.sh
+    rm -f /etc/sudoers.d/tmp
 fi
 
 if [[ "$gpu" == "amd" ]]; then
