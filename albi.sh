@@ -66,7 +66,7 @@ if [[ -e "config.conf" ]]; then
         if [[ "$luks_encryption" == "yes" ]]; then
             echo "Disk encryption is enabled with a passphrase $luks_passphrase"
             if [[ "$tpm2_luks" == "yes" ]]; then
-                echo "LUKS key will be stored in the TPM2 device."
+                echo "LUKS key will be stored in the TPM2 device"
             fi
         else
             echo "Disk encryption is disabled"
@@ -98,8 +98,7 @@ if [[ -e "config.conf" ]]; then
         fi
         
         if [[ "$create_swapfile" == "yes" ]]; then
-            echo "Swapfile creation is enabled"
-            echo "Swapfile size (GB): $swapfile_size_gb"
+            echo "Swapfile creation is enabled, size: $swapfile_size_gb"
         else
             echo "Swapfile creation is disabled"
         fi
