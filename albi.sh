@@ -756,13 +756,16 @@ elif [[ "$de" == "mate" ]]; then
 fi
 
 if [[ "$install_cups" == yes ]]; then
-    pacman -S cups cups-browsed cups-filters cups-pk-helper bluez-cups foomatic-db foomatic-db-engine foomatic-db-gutenprint-ppds foomatic-db-nonfree foomatic-db-nonfree-ppds foomatic-db-ppds ghostscript gutenprint hplip nss-mdns system-config-printer --noconfirm
+    pacman -S cups cups-browsed cups-filters cups-pk-helper foomatic-db foomatic-db-engine foomatic-db-gutenprint-ppds foomatic-db-nonfree foomatic-db-nonfree-ppds foomatic-db-ppds ghostscript gutenprint hplip nss-mdns system-config-printer --noconfirm
     systemctl enable cups
     systemctl enable cups-browsed
     systemctl enable avahi-daemon
     sed -i "s/^hosts:.*/hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns/" /etc/nsswitch.conf
     rm -f /usr/share/applications/hplip.desktop
     rm -f /usr/share/applications/hp-uiscan.desktop
+    if [[ "$bluetooth" == "yes" ]]; then
+        pacman -S bluez-cups --noconfirm
+    fi
 fi
 
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //g' /etc/sudoers
