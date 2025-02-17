@@ -219,7 +219,7 @@ username_length=${#username}
 luks_passphrase_length=${#luks_passphrase}
 
 if ! [[ "$network_management" == "network-manager" || "$network_management" == "systemd-networkd" || "$network_management" == "none" ]]; then
-    echo "Error: invalid value for the network management tool."
+    echo "Error: invalid value for the network management tool: $network_management"
     exit
 fi
 
@@ -235,12 +235,12 @@ if [[ "$network_management" == "systemd-networkd" ]]; then
 fi
 
 if ! [[ "$bluetooth" == "yes" || "$bluetooth" == "no" ]]; then
-    echo "Error: invalid value for the bluetooth support question."
+    echo "Error: invalid value for the bluetooth support question: $bluetooth"
     exit
 fi
 
 if ! [[ "$kernel_variant" == "normal" || "$kernel_variant" == "lts" || "$kernel_variant" == "zen" ]]; then
-    echo "Error: invalid value for the kernel variant."
+    echo "Error: invalid value for the kernel variant: $kernel_variant"
     exit
 fi
 
@@ -255,22 +255,22 @@ if ! [[ "$username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
 fi
 
 if ! [[ "$audio_server" == "pipewire" || "$audio_server" == "pulseaudio" || "$audio_server" == "none" ]]; then
-    echo "Error: invalid value for the audio server."
+    echo "Error: invalid value for the audio server: $audio_server"
     exit
 fi
 
 if ! [[ "$install_cups" == "yes" || "$install_cups" == "no" ]]; then
-    echo "Error: invalid value for the CUPS installation setting."
+    echo "Error: invalid value for the CUPS installation setting: $install_cups"
     exit
 fi
 
 if ! [[ "$gpu" == "amd" || "$gpu" == "intel" || "$gpu" == "nvidia" || "$gpu" == "other" ]]; then
-    echo "Error: invalid value for the GPU driver."
+    echo "Error: invalid value for the GPU driver: $gpu"
     exit
 fi
 
 if ! [[ "$de" == "cinnamon" || "$de" == "gnome" || "$de" == "mate" || "$de" == "plasma" || "$de" == "xfce" || "$de" == "none" ]]; then
-    echo "Error: invalid value for the desktop environment."
+    echo "Error: invalid value for the desktop environment: $de"
     exit
 fi
 
@@ -282,29 +282,30 @@ if [[ "$luks_encryption" == "yes" ]]; then
 fi
 
 if ! [[ "$create_swapfile" == "yes" || "$create_swapfile" == "no" ]]; then
-    echo "Error: invalid value for the swapfile creation question."
+    echo "Error: invalid value for the swapfile creation question: $swapfile_creation"
     exit
 fi
 
 if ! [[ "$swapfile_size_gb" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-    echo "Error: invalid value for the swapfile size - the value isn't numeric."
+    echo "Error: invalid value for the swapfile size - the value isn't numeric: $swapfile_size"
     exit
 fi
 
 if [[ "$boot_mode" == "UEFI" ]]; then
     if ! [[ "$efi_part_mountpoint" == "/boot/efi" || "$efi_part_mountpoint" == "/efi" ]]; then
-        echo "Error: invalid EFI partition mount point detected. For maximized system compatibility, ALBI only supports the following mount points: /boot/efi (recommended) and /efi."
+        echo "Error: invalid EFI partition mount point detected: $efi_part_mountpoint"
+        echo "For maximized system compatibility, ALBI only supports the following mount points: /boot/efi (recommended) and /efi."
         exit
     fi
 fi
 
 if ! grep -qE "^#?\s*${language}" /etc/locale.gen; then
-    echo "Selected language doesn't exist (not found in /etc/locale.gen.)"
+    echo "Selected language doesn't exist (not found in /etc/locale.gen.): $language"
     exit
 fi
 
 if ! localectl list-keymaps | grep -Fxq "$tty_keyboard_layout"; then
-    echo "Selected TTY Keymap isn't available."
+    echo "Selected TTY Keymap isn't available: $tty_keyboard_layout"
     exit
 fi
 
@@ -360,7 +361,7 @@ if [[ "$root_part" != "none" ]]; then
                 yes | mkfs.xfs "$root_part"
                 mount "$root_part" /mnt
             else
-                echo "Error: wrong filesystem for the / partition."
+                echo "Error: wrong filesystem for the / partition: $root_part"
                 exit
             fi
         else
@@ -425,7 +426,7 @@ if [[ "$home_part_exists" == "true" ]]; then
         mkdir -p /mnt/home
         mount "$separate_home_part" /mnt/home
     else
-        echo "Error: wrong filesystem for the /home partition."
+        echo "Error: wrong filesystem for the /home partition: $separate_home_part_filesystem"
     fi
 fi
 
@@ -451,7 +452,7 @@ if [[ "$boot_part_exists" == "true" ]]; then
         mkdir -p /mnt/boot
         mount -o compress=zstd "$separate_boot_part" /mnt/boot
     else
-        echo "Error: wrong filesystem for the /boot partition."
+        echo "Error: wrong filesystem for the /boot partition: $separate_boot_part_filesystem"
     fi
 fi
 
@@ -478,7 +479,7 @@ if [[ "$var_part_exists" == "true" ]]; then
         mkdir -p /mnt/var
         mount "$separate_var_part" /mnt/var
     else
-        echo "Error: wrong filesystem for the /var partition."
+        echo "Error: wrong filesystem for the /var partition: $var_part_filesystem"
     fi
 fi
 
@@ -505,7 +506,7 @@ if [[ "$tmp_part_exists" == "true" ]]; then
         mkdir -p /mnt/tmp
         mount "$separate_tmp_part" /mnt/tmp
     else
-        echo "Error: wrong filesystem for the /tmp partition."
+        echo "Error: wrong filesystem for the /tmp partition: $separate_tmp_part_filesystem"
     fi
 fi
 
