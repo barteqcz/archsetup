@@ -115,8 +115,8 @@ if [[ -e "config.conf" ]]; then
             read -rp "Do you want to start the installation? [Y/n] " response
 
             if [[ "$response" == "Y" || "$response" == "y" || "$response" == "" ]]; then
-                clear
                 break
+                clear
             elif [[ "$response" == "N" || "$response" == "n" ]]; then
                 echo "Aborting..."
                 exit
@@ -124,8 +124,6 @@ if [[ -e "config.conf" ]]; then
                 echo "Error: incorrect option. Please try again"
             fi
         done
-
-        echo ""
 
         source "$cwd"/config.conf
     fi
