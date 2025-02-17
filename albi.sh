@@ -576,7 +576,7 @@ ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 systemctl enable systemd-timesyncd
 hwclock --systohc
 
-pacman -Sy btrfs-progs dosfstools inetutils xfsprogs base-devel bash-completion bluez bluez-utils nano git grub ntfs-3g sshfs networkmanager dnsmasq wget exfatprogs usbutils xdg-utils xdg-user-dirs unzip unrar zip 7zip os-prober plymouth --noconfirm
+pacman -Sy btrfs-progs dosfstools inetutils xfsprogs base-devel polkit bash-completion bluez bluez-utils nano git grub ntfs-3g sshfs networkmanager dnsmasq wget exfatprogs usbutils xdg-utils xdg-user-dirs unzip unrar zip 7zip os-prober plymouth --noconfirm
 systemctl enable NetworkManager
 systemctl enable bluetooth
 
