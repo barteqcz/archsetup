@@ -228,6 +228,9 @@ if [[ "$network_management" == "systemd-networkd" ]]; then
         echo "Error: ALBI currently doesn't support systemd-networkd for wireless connection."
         echo "In this case, please use Network Manager."
         exit
+    elif [[ "$de" != "none" ]]; then
+        echo "Error: If you wish to use a desktop environment, please use Network Manager."
+        exit
     fi
 fi
 
