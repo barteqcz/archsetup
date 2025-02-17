@@ -298,8 +298,13 @@ if [[ "$boot_mode" == "UEFI" ]]; then
     fi
 fi
 
-if ! grep -qF "$language" "/etc/locale.gen"; then
-    echo "Error: the language you picked, doesn't exist."
+if ! grep -qE "^#?\s*${language}" /etc/locale.gen; then
+    echo "Selected language doesn't exist (not found in /etc/locale.gen.)"
+    exit
+fi
+
+if ! localectl list-keymaps | grep -Fxq "$tty_keyboard_layout"; then
+    echo "Selected TTY Keymap isn't available."
     exit
 fi
 
