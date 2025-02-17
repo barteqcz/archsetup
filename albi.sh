@@ -303,7 +303,7 @@ if ! grep -qE "^#?\s*${language}" /etc/locale.gen; then
 fi
 
 if ! localectl list-keymaps | grep -Fxq "$tty_keyboard_layout"; then
-    echo "Selected TTY Keymap isn't available: $tty_keyboard_layout"
+    echo "Selected TTY keymap isn't available: $tty_keyboard_layout"
     exit
 fi
 
