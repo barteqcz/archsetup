@@ -30,6 +30,7 @@ if [[ -e "config.conf" ]]; then
         source "$cwd"/config.conf
         clear
         echo "Are these information correct?"
+        echo ""
 
         echo "/: $root_part_filesystem on $root_part"
 
