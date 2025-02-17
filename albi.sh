@@ -170,6 +170,11 @@ fi
 
 cat <<EOF >> config.conf
 
+### Connectivity
+#### Please note, that if you plan to use a desktop environment, NetworkManager is needed. systemd-networkd is better for server environments.
+network_management="network-manager"  #### Network management tool (network-manager/systemd-networkd/none)
+bluetooth="yes"  #### Decides if you want to have Bluetooth support (yes/no)
+
 ### Kernel Variant
 kernel_variant="normal"  #### Kernel variant (normal/lts/zen)
 
@@ -212,6 +217,27 @@ fi
 passwd_length=${#password}
 username_length=${#username}
 luks_passphrase_length=${#luks_passphrase}
+
+if ! [[ "$network_management" == "network-manager" || "$network_management" == "systemd-networkd" || "$network_management" == "none" ]]; then
+    echo "Error: invalid value for the network management tool."
+    exit
+fi
+
+if [[ "$network_management" == "systemd-networkd" ]]; then
+    if [ -d "/sys/class/net/$iface/wireless" ]; then
+        echo "Error: ALBI currently doesn't support systemd-networkd for wireless connection."
+        echo "In this case, please use Network Manager."
+        exit
+    elif [[ "$de" != "none" ]]; then
+        echo "Error: If you wish to use a desktop environment, please use Network Manager."
+        exit
+    fi
+fi
+
+if ! [[ "$bluetooth" == "yes" || "$bluetooth" == "no" ]]; then
+    echo "Error: invalid value for the bluetooth support question."
+    exit
+fi
 
 if ! [[ "$kernel_variant" == "normal" || "$kernel_variant" == "lts" || "$kernel_variant" == "zen" ]]; then
     echo "Error: invalid value for the kernel variant."
@@ -514,7 +540,7 @@ ping -c 4 google.com > /dev/null 2>&1
 if ! [[ $? -eq 0 ]]; then
     ping -c 4 one.one.one.one > /dev/null 2>&1
     if ! [[ $? -eq 0 ]]; then
-        echo "Error: DNS isn't working. Check your network's configuration"
+        echo "Error: DNS isn't working. Check your network configuration"
     fi
 fi
 
@@ -575,9 +601,38 @@ ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 systemctl enable systemd-timesyncd
 hwclock --systohc
 
-pacman -Sy btrfs-progs dosfstools inetutils xfsprogs base-devel polkit bash-completion bluez bluez-utils nano git grub ntfs-3g sshfs networkmanager dnsmasq wget exfatprogs usbutils xdg-utils xdg-user-dirs unzip unrar zip 7zip os-prober plymouth --noconfirm
-systemctl enable NetworkManager
-systemctl enable bluetooth
+pacman -Sy btrfs-progs dosfstools inetutils xfsprogs base-devel polkit bash-completion nano git grub ntfs-3g sshfs dnsmasq wget exfatprogs usbutils xdg-utils xdg-user-dirs unzip unrar zip 7zip os-prober plymouth --noconfirm
+
+if [[ "$network_management" == "network-manager" ]]; then
+    pacman -S network-manager --noconfirm
+    systemctl enable NetworkManager
+elif [[ "$network_management" == "systemd-networkd" ]]; then
+    default_route=$(ip route | grep '^default')
+    gateway=$(echo "$default_route" | awk '{print $3}')
+    iface=$(echo "$default_route" | awk '{print $5}')
+    method=$(echo "$default_route" | awk '{print $7}')
+    ip_info=$(ip addr show "$iface" | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\d+')
+    echo "[Match]" > /etc/systemd/network/20-wired.network
+    echo "Name=$iface" >> /etc/systemd/network/20-wired.network
+    echo "" >> /etc/systemd/network/20-wired.network
+    echo "[Link]" >> /etc/systemd/network/20-wired.network
+    echo "RequiredForOnline=routable" >> /etc/systemd/network/20-wired.network
+    echo "" >> /etc/systemd/network/20-wired.network
+    echo "[Network]" >> /etc/systemd/network/20-wired.network
+    if [[ "$method" == "dhcp" ]]; then
+        echo "DHCP=yes" >> /etc/systemd/network/20-wired.network
+    elif [[ "$method" == "static" ]]; then
+        echo "Address=$ip_info" >> /etc/systemd/network/20-wired.network
+        echo "Gateway=$gateway" >> /etc/systemd/network/20-wired.network
+        echo "DNS=1.1.1.1" >> /etc/systemd/network/20-wired.network
+    fi
+    systemctl enable systemd-networkd systemd-resolved
+fi
+
+if [[ "$bluetooth" == "yes" ]]; then
+    pacman -S bluez bluez-utils --noconfirm
+    systemctl enable bluetooth
+fi
 
 if [[ -d "/sys/firmware/efi/" ]]; then
     boot_mode="UEFI"
@@ -615,6 +670,7 @@ echo "$password" | passwd "$username" --stdin
 if [[ "$full_username" != "" ]]; then
     usermod -c "$full_username" "$username"
 fi
+
 usermod -aG wheel "$username"
 
 cln=$(grep -n "Color" /etc/pacman.conf | cut -d ':' -f1)
@@ -700,13 +756,16 @@ elif [[ "$de" == "mate" ]]; then
 fi
 
 if [[ "$install_cups" == yes ]]; then
-    pacman -S cups cups-browsed cups-filters cups-pk-helper bluez-cups foomatic-db foomatic-db-engine foomatic-db-gutenprint-ppds foomatic-db-nonfree foomatic-db-nonfree-ppds foomatic-db-ppds ghostscript gutenprint hplip nss-mdns system-config-printer --noconfirm
+    pacman -S cups cups-browsed cups-filters cups-pk-helper foomatic-db foomatic-db-engine foomatic-db-gutenprint-ppds foomatic-db-nonfree foomatic-db-nonfree-ppds foomatic-db-ppds ghostscript gutenprint hplip nss-mdns system-config-printer --noconfirm
     systemctl enable cups
     systemctl enable cups-browsed
     systemctl enable avahi-daemon
     sed -i "s/^hosts:.*/hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns/" /etc/nsswitch.conf
     rm -f /usr/share/applications/hplip.desktop
     rm -f /usr/share/applications/hp-uiscan.desktop
+    if [[ "$bluetooth" == "yes" ]]; then
+        pacman -S bluez-cups --noconfirm
+    fi
 fi
 
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //g' /etc/sudoers
