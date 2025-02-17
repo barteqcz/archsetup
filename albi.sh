@@ -670,6 +670,7 @@ echo "$password" | passwd "$username" --stdin
 if [[ "$full_username" != "" ]]; then
     usermod -c "$full_username" "$username"
 fi
+
 usermod -aG wheel "$username"
 
 cln=$(grep -n "Color" /etc/pacman.conf | cut -d ':' -f1)
