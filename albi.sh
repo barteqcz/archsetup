@@ -195,8 +195,8 @@ tty_keyboard_layout="us"  #### TTY keyboard layout
 
 ### Software Selection
 audio_server="pipewire"  #### Audio server (pulseaudio/pipewire/none)
-gpu="amd"  #### GPU driver (amd/intel/nvidia/other)
-de="plasma"  #### Desktop environment (gnome/plasma/xfce/mate/cinnamon/none)
+gpu="amd"  #### GPU driver (amd/intel/nvidia/other/none)
+de="gnome"  #### Desktop environment (gnome/plasma/xfce/mate/cinnamon/none)
 install_cups="yes"  #### Install CUPS (yes/no)
 
 ### Swapfile
@@ -222,7 +222,7 @@ fi
 
 if [[ "$network_management" == "systemd-networkd" ]]; then
     if [ -d "/sys/class/net/$iface/wireless" ]; then
-        echo "Error: ALBI currently doesn't support systemd-networkd for wireless connection."
+        echo "Error: ALBI currently doesn't support systemd-networkd for wireless connections."
         echo "In this case, please use Network Manager."
         exit
     elif [[ "$de" != "none" ]]; then
@@ -264,6 +264,13 @@ fi
 if ! [[ "$gpu" == "amd" || "$gpu" == "intel" || "$gpu" == "nvidia" || "$gpu" == "other" ]]; then
     echo "Error: invalid value for the GPU driver: $gpu"
     exit
+fi
+
+if [[ "$gpu" == "none" ]]; then
+    if ! [[ "$de" == "none" ]]; then
+        echo "Error: desktop environment requires a GPU driver to be installed."
+        exit
+    fi
 fi
 
 if ! [[ "$de" == "cinnamon" || "$de" == "gnome" || "$de" == "mate" || "$de" == "plasma" || "$de" == "xfce" || "$de" == "none" ]]; then
@@ -717,7 +724,7 @@ elif [[ "$audio_server" == "pulseaudio" ]]; then
 fi
 
 if [[ "$gpu" == "amd" ]]; then
-    pacman -S mesa vulkan-radeon libva-mesa-driver mesa-vdpau --noconfirm
+    pacman -S mesa vulkan-radeon --noconfirm
 elif [[ "$gpu" == "intel" ]]; then
     pacman -S mesa vulkan-intel intel-media-driver --noconfirm
 elif [[ "$gpu" == "nvidia" ]]; then
@@ -729,7 +736,7 @@ elif [[ "$gpu" == "nvidia" ]]; then
     fi
     grub-mkconfig -o /boot/grub/grub.cfg
 elif [[ "$gpu" == "other" ]]; then
-    pacman -S mesa libva-mesa-driver mesa-vdpau --noconfirm
+    pacman -S mesa --noconfirm
 fi
 
 if [[ "$de" == "gnome" ]]; then
