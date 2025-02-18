@@ -98,7 +98,7 @@ if [[ -e "config.conf" ]]; then
         fi
         
         if [[ "$create_swapfile" == "yes" ]]; then
-            echo "Swapfile creation is enabled, size: $swapfile_size_gb"
+            echo "Swapfile creation is enabled, size: $swapfile_size_gb GB"
         else
             echo "Swapfile creation is disabled"
         fi
