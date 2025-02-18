@@ -261,7 +261,7 @@ if ! [[ "$install_cups" == "yes" || "$install_cups" == "no" ]]; then
     exit
 fi
 
-if ! [[ "$gpu" == "amd" || "$gpu" == "intel" || "$gpu" == "nvidia" || "$gpu" == "other" ]]; then
+if ! [[ "$gpu" == "amd" || "$gpu" == "intel" || "$gpu" == "nvidia" || "$gpu" == "other" || "$gpu" == "none" ]]; then
     echo "Error: invalid value for the GPU driver: $gpu"
     exit
 fi
