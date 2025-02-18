@@ -607,7 +607,7 @@ hwclock --systohc
 pacman -Sy btrfs-progs dosfstools inetutils xfsprogs base-devel polkit bash-completion nano git grub ntfs-3g sshfs dnsmasq wget exfatprogs usbutils xdg-utils xdg-user-dirs unzip unrar zip 7zip os-prober plymouth --noconfirm
 
 if [[ "$network_management" == "network-manager" ]]; then
-    pacman -S network-manager --noconfirm
+    pacman -S networkmanager --noconfirm
     systemctl enable NetworkManager
 elif [[ "$network_management" == "systemd-networkd" ]]; then
     default_route=$(ip route | grep '^default')
