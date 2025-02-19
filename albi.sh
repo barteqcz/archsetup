@@ -640,7 +640,7 @@ elif [[ "$network_management" == "systemd-networkd" ]]; then
 fi
 
 if [[ "$bluetooth" == "yes" ]]; then
-    pacman -S bluez bluez-utils --noconfirm
+    pacman -S bluez --noconfirm
     systemctl enable bluetooth
 fi
 
